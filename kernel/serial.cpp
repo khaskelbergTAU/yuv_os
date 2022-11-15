@@ -97,7 +97,7 @@ namespace serial
         return res;
     }
     const char *hex_digit_table = "0123456789ABCDEF";
-    toStrResult itox(unsigned int x)
+    toStrResult itox(unsigned int x, int padding)
     {
         toStrResult res{};
         if (x == 0)
@@ -112,7 +112,13 @@ namespace serial
         while (b > 0)
         {
             indx++;
+            padding--;
             b /= 16;
+        }
+        while(padding > 0){
+            res.data[1 + (padding--)] = '0';
+            indx++;
+
         }
         while (x > 0)
         {

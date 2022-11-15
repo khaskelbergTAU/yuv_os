@@ -6,7 +6,7 @@ namespace serial
         char data[32];
     };
     toStrResult itos(int a);
-    toStrResult itox(unsigned int a);
+    toStrResult itox(unsigned int a, int padding = 0);
     class SerialPort
     {
     public:
@@ -54,15 +54,36 @@ namespace serial
         int format(const char *fmt_arg, T val)
         {
             int read_amt{};
+            int padding = 0;
             switch (*(fmt_arg++))
             {
             case 'd':
                 read_amt++;
-                writestr(itos(val).data);
+                writestr(itos((int)val).data);
                 break;
             case 'x':
                 read_amt++;
-                writestr(itox(val).data);
+                if (*(fmt_arg) == ':')
+                {
+                    fmt_arg++;
+                    read_amt++;
+                    while (*(fmt_arg) <= '9' && *(fmt_arg) >= '0')
+                    {
+                        padding *=10;
+                        padding += *(fmt_arg) - '0';
+                        read_amt++;
+                        fmt_arg++;
+                    }
+                }
+                writestr(itox((int)val, padding).data);
+                break;
+            case 'p':
+                read_amt++;
+                writestr(itox((int)val, 16).data);
+                break;
+            case 's':
+                read_amt++;
+                writestr((const char *)val);
                 break;
             }
             return read_amt;
