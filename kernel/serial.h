@@ -7,6 +7,7 @@ namespace serial
     };
     toStrResult itos(int a);
     toStrResult itox(unsigned int a, int padding = 0);
+    toStrResult itob(unsigned int a, int padding = 0);
     class SerialPort
     {
     public:
@@ -69,7 +70,7 @@ namespace serial
                     read_amt++;
                     while (*(fmt_arg) <= '9' && *(fmt_arg) >= '0')
                     {
-                        padding *=10;
+                        padding *= 10;
                         padding += *(fmt_arg) - '0';
                         read_amt++;
                         fmt_arg++;
@@ -85,6 +86,21 @@ namespace serial
                 read_amt++;
                 writestr((const char *)val);
                 break;
+            case 'b':
+                read_amt++;
+                if (*(fmt_arg) == ':')
+                {
+                    fmt_arg++;
+                    read_amt++;
+                    while (*(fmt_arg) <= '9' && *(fmt_arg) >= '0')
+                    {
+                        padding *= 10;
+                        padding += *(fmt_arg) - '0';
+                        read_amt++;
+                        fmt_arg++;
+                    }
+                }
+                writestr(itob((int)val, padding).data);
             }
             return read_amt;
         }

@@ -1,6 +1,7 @@
 CC = $(HOME)/opt/cross/bin/i686-elf-gcc
 CXX = $(HOME)/opt/cross/bin/i686-elf-g++
-ASM = $(HOME)/opt/cross/bin/i686-elf-as
+ASM = nasm
+ASFLAGS:= -f elf
 CPPFLAGS:=$(CPPFLAGS) -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -fno-plt -fno-pic -m32
 LDFLAGS:=$(LDFLAGS) -T linker.ld -ffreestanding -O2 -nostdlib -lgcc
 
@@ -9,7 +10,8 @@ CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) -print-file-name=crtbegin.o)
 CRTEND_OBJ:=$(shell $(CC) $(CFLAGS) -print-file-name=crtend.o)
 CRTN_OBJ=crtn.o
 
-OBJECTS = serial.o kernel.o video.o utils/string.o boot.o paging.o 
+OBJECTS =  boot.o serial.o kernel.o video.o utils/string.o paging.o
+# OBJECTS = boot.o kernel.o paging.o
 
 
 

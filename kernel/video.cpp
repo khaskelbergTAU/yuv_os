@@ -17,7 +17,7 @@ static inline VGA_ENTRY vga_entry(unsigned char c, uint8_t color)
 Video::Video()
 {
     pos = 0;
-    videomem = (uint16_t *)0xb8000;
+    videomem = (uint16_t *)0xc00b8000;
     color = vga_entry_color(VGA_COLOR::BLACK, VGA_COLOR::BLACK);
     clear();
 }

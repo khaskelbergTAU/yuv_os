@@ -2,3 +2,4 @@
 *kernel.elf
 *.iso
 isodir/boot/grub/grub.cfg
+.gdb_history

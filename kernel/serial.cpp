@@ -100,14 +100,18 @@ namespace serial
     toStrResult itox(unsigned int x, int padding)
     {
         toStrResult res{};
-        if (x == 0)
-        {
-            res.data[0] = '0';
-            return res;
-        }
         int indx{};
         res.data[indx++] = '0';
         res.data[indx++] = 'x';
+        if (x == 0)
+        {
+            while (indx < padding)
+            {
+                res.data[indx++] = '0';
+            }
+
+            return res;
+        }
         int b = x;
         while (b > 0)
         {
@@ -115,15 +119,50 @@ namespace serial
             padding--;
             b /= 16;
         }
-        while(padding > 0){
+        while (padding > 0)
+        {
             res.data[1 + (padding--)] = '0';
             indx++;
-
         }
         while (x > 0)
         {
             res.data[--indx] = hex_digit_table[x % 16];
             x /= 16;
+        }
+
+        return res;
+    }
+    toStrResult itob(unsigned int x, int padding)
+    {
+        toStrResult res{};
+        int indx{};
+        res.data[indx++] = '0';
+        res.data[indx++] = 'b';
+        if (x == 0)
+        {
+            while (indx < padding)
+            {
+                res.data[indx++] = '0';
+            }
+
+            return res;
+        }
+        int b = x;
+        while (b > 0)
+        {
+            indx++;
+            padding--;
+            b /= 2;
+        }
+        while (padding > 0)
+        {
+            res.data[1 + (padding--)] = '0';
+            indx++;
+        }
+        while (x > 0)
+        {
+            res.data[--indx] = x & 1 ? '1' : '0';
+            x /= 2;
         }
 
         return res;
