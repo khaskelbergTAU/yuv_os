@@ -30,7 +30,5 @@ struct __attribute__((__packed__)) page
 };
 extern "C"
 {
-    void map_kernel(directory table[1024]);
-    extern void _enable_paging();
     extern void _load_cr3(directory page_table_directory[1024]);
 }

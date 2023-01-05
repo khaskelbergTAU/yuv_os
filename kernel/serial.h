@@ -3,7 +3,7 @@ namespace serial
 {
     struct toStrResult
     {
-        char data[32];
+        char data[128];
     };
     toStrResult itos(int a);
     toStrResult itox(unsigned int a, int padding = 0);

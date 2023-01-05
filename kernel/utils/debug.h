@@ -1,0 +1,1 @@
+#define INFO(a) DEBUG_PORT.printf("[INFO] %s at %s:%d:%s\n", a, __FILE__, __LINE__, __func__);
