@@ -1,6 +1,6 @@
 .PHONY: iso kernel qemu qemu-gdb qemu-kernel qemu-test clean
 
-QEMU:= qemu-system-i386.exe
+QEMU:= qemu-system-i386
 
 myos.iso: kernel grub.cfg
 	cp kernel/kernel.elf isodir/boot/kernel.elf

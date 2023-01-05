@@ -1,5 +1,9 @@
 #include "video.h"
 #include "utils/string.h"
+#include "serial.h"
+
+extern serial::SerialPort DEBUG_PORT;
+
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
