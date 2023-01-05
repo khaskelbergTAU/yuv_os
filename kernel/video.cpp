@@ -1,5 +1,9 @@
 #include "video.h"
 #include "utils/string.h"
+#include "serial.h"
+
+extern serial::SerialPort DEBUG_PORT;
+
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -14,10 +18,8 @@ static inline VGA_ENTRY vga_entry(unsigned char c, uint8_t color)
     return ((uint16_t)c) | (((uint16_t)color) << 8);
 }
 
-Video::Video()
+Video::Video(uint16_t *videomem) : videomem(static_cast<VGA_ENTRY *>(videomem)), pos(0)
 {
-    pos = 0;
-    videomem = (uint16_t *)0xc00b8000;
     color = vga_entry_color(VGA_COLOR::BLACK, VGA_COLOR::BLACK);
     clear();
 }

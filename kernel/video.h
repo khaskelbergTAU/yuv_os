@@ -28,7 +28,7 @@ enum VGA_COLOR
 class Video
 {
 public:
-    Video();
+    Video(uint16_t *videomem);
     ~Video();
     void clear();
     void set_color(VGA_COLOR fg, VGA_COLOR bg);

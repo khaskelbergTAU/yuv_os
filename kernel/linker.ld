@@ -13,8 +13,9 @@ SECTIONS {
     }
 
     . += 0xc0000000;
+    __kernel_start = .;
 
-    .text ALIGN(4K) : AT(ADDR(.text) - 0xc0000000) {
+    .text : AT(ADDR(.text) - 0xc0000000) {
         *(.text)
     }
 
@@ -26,4 +27,5 @@ SECTIONS {
         *(COMMON)
         *(.bss)
     }
+    __kernel_end = .;
 }

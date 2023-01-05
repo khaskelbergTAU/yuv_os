@@ -105,7 +105,7 @@ namespace serial
         res.data[indx++] = 'x';
         if (x == 0)
         {
-            while (indx < padding)
+            while (indx < padding + 2)
             {
                 res.data[indx++] = '0';
             }

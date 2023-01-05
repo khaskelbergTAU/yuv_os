@@ -80,7 +80,7 @@ namespace serial
                 break;
             case 'p':
                 read_amt++;
-                writestr(itox((int)val, 16).data);
+                writestr(itox((int)val, 8).data);
                 break;
             case 's':
                 read_amt++;
