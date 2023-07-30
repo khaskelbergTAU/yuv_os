@@ -5,9 +5,9 @@ namespace serial
     {
         char data[128];
     };
-    toStrResult itos(int a);
-    toStrResult itox(unsigned int a, int padding = 0);
-    toStrResult itob(unsigned int a, int padding = 0);
+    toStrResult itos(int64_t a);
+    toStrResult itox(uint64_t a, int padding = 0);
+    toStrResult itob(uint64_t a, int padding = 0);
     class SerialPort
     {
     public:
@@ -56,11 +56,12 @@ namespace serial
         {
             int read_amt{};
             int padding = 0;
+            uint64_t ext_val = (uint64_t)(val);
             switch (*(fmt_arg++))
             {
             case 'd':
                 read_amt++;
-                writestr(itos((int)val).data);
+                writestr(itos(*reinterpret_cast<int64_t *>(&ext_val)).data);
                 break;
             case 'x':
                 read_amt++;
@@ -76,15 +77,15 @@ namespace serial
                         fmt_arg++;
                     }
                 }
-                writestr(itox((int)val, padding).data);
+                writestr(itox(ext_val, padding).data);
                 break;
             case 'p':
                 read_amt++;
-                writestr(itox((int)val, 8).data);
+                writestr(itox(ext_val, 8).data);
                 break;
             case 's':
                 read_amt++;
-                writestr((const char *)val);
+                writestr(reinterpret_cast<const char *>(ext_val));
                 break;
             case 'b':
                 read_amt++;
@@ -100,7 +101,7 @@ namespace serial
                         fmt_arg++;
                     }
                 }
-                writestr(itob((int)val, padding).data);
+                writestr(itob(ext_val, padding).data);
             }
             return read_amt;
         }

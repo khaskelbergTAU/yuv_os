@@ -69,7 +69,7 @@ namespace serial
         }
     }
 
-    toStrResult itos(int a)
+    toStrResult itos(int64_t a)
     {
         toStrResult res{};
         if (a == 0)
@@ -97,7 +97,7 @@ namespace serial
         return res;
     }
     const char *hex_digit_table = "0123456789ABCDEF";
-    toStrResult itox(unsigned int x, int padding)
+    toStrResult itox(uint64_t x, int padding)
     {
         toStrResult res{};
         int indx{};
@@ -132,7 +132,7 @@ namespace serial
 
         return res;
     }
-    toStrResult itob(unsigned int x, int padding)
+    toStrResult itob(uint64_t x, int padding)
     {
         toStrResult res{};
         int indx{};

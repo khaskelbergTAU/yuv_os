@@ -23,6 +23,6 @@ extern "C" void kernel_main(directory page_table[1024])
 
     INFO("System Up!")
     DEBUG_PORT.printf("the kernel page table value is %b:32\n", ((uint32_t *)page_table)[0xc0000000 >> 22]);
-    DEBUG_PORT.printf("The kernel take up addresses %p to %p\n", _kernel_start, _kernel_end);
+    DEBUG_PORT.printf("The kernel takes up addresses %p to %p\n", _kernel_start, _kernel_end);
     // DEBUG_PORT.printf("the first value is %b:32\n", (reinterpret_cast<uint32_t *>(page_table))[0xc0000000 >> 22]);
 }
