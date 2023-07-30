@@ -2,23 +2,10 @@
 namespace serial
 {
 
-    static inline void outb(uint16_t portnum, uint8_t val)
-    {
-        asm(
-            "outb %1, %0" ::"Nd"(portnum), "a"(val));
-    }
-    static inline uint8_t inb(uint16_t portnum)
-    {
-        uint8_t c;
-        asm(
-            "inb %1, %0"
-            : "=a"(c)
-            : "Nd"(portnum));
-        return c;
-    }
 
     SerialPort::SerialPort(uint16_t portnum) : portnum(portnum)
     {
+        using namespace io;
 
         outb(irq(), 0x0);
         outb(line_control_reg(), 0x80);
@@ -66,9 +53,9 @@ namespace serial
         volatile uint8_t dat = 0;
         do
         {
-            dat = serial::inb(line_status_reg()) & 0x20;
+            dat = io::inb(line_status_reg()) & 0x20;
         } while (dat == 0);
-        outb(portnum, c);
+        io::outb(portnum, c);
     }
 
     void SerialPort::writestr(const char *s)
@@ -115,7 +102,7 @@ namespace serial
     toStrResult itox(uint64_t x, int padding)
     {
         toStrResult res{};
-        int indx{};
+        int indx = 0;
         res.data[indx++] = '0';
         res.data[indx++] = 'x';
         if (x == 0)
@@ -127,7 +114,7 @@ namespace serial
 
             return res;
         }
-        int b = x;
+        uint64_t b = x;
         while (b > 0)
         {
             indx++;

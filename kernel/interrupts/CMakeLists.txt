@@ -1,0 +1,1 @@
+add_library(interrupts STATIC interrupts.cpp)

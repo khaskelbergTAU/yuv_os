@@ -1,3 +1,5 @@
+#ifndef _KERNEL_MEMORY_PAGING_H
+#define _KERNEL_MEMORY_PAGING_H
 #include <stdint.h>
 
 struct __attribute__((__packed__)) directory
@@ -32,3 +34,6 @@ extern "C"
 {
     extern void _load_cr3(directory page_table_directory[1024]);
 }
+
+
+#endif/* _KERNEL_MEMORY_PAGING_H */

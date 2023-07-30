@@ -10,7 +10,7 @@ enable_language(ASM_NASM)
 set(CMAKE_ASM_NASM_COMPILER_FLAGS "-f elf")
 set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> ${CMAKE_ASM_NASM_COMPILER_FLAGS} -o <OBJECT> <SOURCE>")
 
-add_compile_options(-ffreestanding -O0 -Wall -Wextra -fno-exceptions -fno-rtti -fno-plt -fno-pic -m32)
+add_compile_options(-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -fno-plt -fno-pic -m32)
 add_link_options(-T ${PROJECT_SOURCE_DIR}/kernel/linker.ld -ffreestanding -O0 -nostdlib)
 
 add_subdirectory(kernel)

@@ -1,0 +1,1 @@
+add_library(memory STATIC gdt.cpp paging.cpp)

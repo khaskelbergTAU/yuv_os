@@ -3,9 +3,11 @@ execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtbegin.o OUTPU
 execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtend.o OUTPUT_VARIABLE CRTEND_O OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 
-add_executable(kernel.elf boot.s kernel.cpp paging.cpp serial.cpp video.cpp ${libgcc})
+add_executable(kernel.elf boot.s kernel.cpp serial.cpp video.cpp ${libgcc})
 
 add_subdirectory(utils)
+add_subdirectory(interrupts)
+add_subdirectory(memory)
 
 set_property(SOURCE boot.s PROPERTY LANGUAGE ASM_NASM)
 
@@ -40,7 +42,7 @@ COMMENT "compiling crt[i|n].s" VERBATIM)
 
 
 add_dependencies(kernel.elf crts)
-target_link_libraries(kernel.elf PUBLIC utils ${libgcc})
+target_link_libraries(kernel.elf PUBLIC utils ${libgcc} interrupts memory)
 
 set(CMAKE_CXX_LINKER ${TOOLS_DIR}/bin/i686-elf-gcc)
 

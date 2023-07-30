@@ -23,10 +23,10 @@ case "$1" in
 	    $QEMU -nographic $@ -kernel $DIR/build/kernel/kernel.elf;;
         "disk" )
         shift 2
-	    cp $DIR/kernel/kernel.elf $DIR/isodir/boot/kernel.elf
+	    cp $DIR/build/kernel/kernel.elf $DIR/isodir/boot/kernel.elf
 	    cp $DIR/grub.cfg $DIR/isodir/boot/grub/grub.cfg
 	    grub-mkrescue -o $DIR/build/myos.iso $DIR/isodir
-	    $QEMU -serial stdio -cdrom $DIR/myos.iso
+	    $QEMU -serial stdio -cdrom $DIR/build/myos.iso
         ;;
         *)
         echo "Usage: $0 run <gui|nogui|disk>"

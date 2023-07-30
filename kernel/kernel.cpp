@@ -1,8 +1,4 @@
-#include "video.h"
-#include "serial.h"
-#include "paging.h"
-#include "utils/debug.h"
-
+#include "kernel.h"
 extern "C"
 {
     char __kernel_start;
@@ -22,7 +18,7 @@ extern "C" int kernel_main(directory page_table[1024])
     v.writestr("Hello, World!\n");
 
     v.writestr("is this thing working?\n");
-    v.writestr("Checking If port is valid.");
+    v.writestr("Checking If port is valid...\n");
     if(DEBUG_PORT.valid())
     {
         v.writestr("Port seems to be valid.\n");

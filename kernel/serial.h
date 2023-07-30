@@ -1,4 +1,7 @@
+#ifndef _KERNEL_SERIAL_H
+#define _KERNEL_SERIAL_H
 #include <stdint.h>
+#include "utils/io_asm.h"
 namespace serial
 {
     struct toStrResult
@@ -58,9 +61,9 @@ namespace serial
         template <typename T>
         int format(const char *fmt_arg, T val)
         {
-            int read_amt{};
+            int read_amt = 0;
             int padding = 0;
-            uint64_t ext_val = (uint64_t)(val);
+            uint64_t ext_val = static_cast<uint64_t>((uintptr_t)val);
             switch (*(fmt_arg++))
             {
             case 'd':
@@ -85,7 +88,7 @@ namespace serial
                 break;
             case 'p':
                 read_amt++;
-                writestr(itox(ext_val, 8).data);
+                writestr(itox(ext_val, sizeof(void *) * 2).data);
                 break;
             case 's':
                 read_amt++;
@@ -112,3 +115,6 @@ namespace serial
     };
 };
 extern serial::SerialPort DEBUG_PORT;
+
+
+#endif/* _KERNEL_SERIAL_H */
