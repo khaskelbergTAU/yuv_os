@@ -1,1 +1,1 @@
-cmake --toolchain=../toolchain.cmake -DCMAKE_CXX_COMPILER_WORKS=1 -DCMAKE_C_COMPILER_WORKS=1 $@ ..
+cmake -DCMAKE_TOOLCHAIN_FILE=$(dirname -- "$0" )/toolchain.cmake -DCMAKE_CXX_COMPILER_WORKS=1 -DCMAKE_C_COMPILER_WORKS=1 $@ ..
