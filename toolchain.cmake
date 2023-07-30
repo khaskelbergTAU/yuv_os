@@ -1,12 +1,12 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR i686)
 
-set(tools $ENV{HOME}/opt/cross)
+set(TOOLS_DIR $ENV{HOME}/opt/cross)
 
-set(CMAKE_C_COMPILER ${tools}/bin/i686-elf-gcc)
-set(CMAKE_CXX_COMPILER ${tools}/bin/i686-elf-g++)
+set(CMAKE_C_COMPILER ${TOOLS_DIR}/bin/i686-elf-gcc)
+set(CMAKE_CXX_COMPILER ${TOOLS_DIR}/bin/i686-elf-g++)
 
-set(CMAKE_FIND_ROOT_PATH tools)
+set(CMAKE_FIND_ROOT_PATH ${TOOLS_DIR})
 
 # search programs in the host environment
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

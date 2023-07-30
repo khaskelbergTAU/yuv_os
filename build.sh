@@ -5,7 +5,8 @@ QEMU=qemu-system-i386
 DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 case "$1" in
     "build" )
-    cmake --build $DIR/build;;
+    shift 1
+    cmake --build $DIR/build $@;;
     "configure" )
     shift 1
     cd $DIR/build
@@ -15,10 +16,13 @@ case "$1" in
     "run" )
     case "$2" in
         "gui" )
-	    $QEMU -serial stdio -kernel $DIR/build/kernel/kernel.elf;;
+        shift 2
+	    $QEMU -serial stdio $@ -kernel $DIR/build/kernel/kernel.elf;;
         "nogui" )
-	    $QEMU -s -S -nographic -kernel $DIR/build/kernel/kernel.elf;;
+        shift 2
+	    $QEMU -nographic $@ -kernel $DIR/build/kernel/kernel.elf;;
         "disk" )
+        shift 2
 	    cp $DIR/kernel/kernel.elf $DIR/isodir/boot/kernel.elf
 	    cp $DIR/grub.cfg $DIR/isodir/boot/grub/grub.cfg
 	    grub-mkrescue -o $DIR/build/myos.iso $DIR/isodir
@@ -29,8 +33,11 @@ case "$1" in
         exit -1;;
     esac
     ;;
+    "clean" )
+    cmake --build $DIR/build --target clean
+    ;;
     *)
-    echo "Usage: $0 <build|configure|run>"
+    echo "Usage: $0 <build|configure|run|clean>"
     exit -1
     ;;
 esac

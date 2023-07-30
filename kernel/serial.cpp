@@ -22,20 +22,27 @@ namespace serial
 
         outb(irq(), 0x0);
         outb(line_control_reg(), 0x80);
-        outb(data_reg(), 0x03);
-        outb(data_reg(), 0);
+        outb(data_reg_lo(), 0x03);
+        outb(data_reg_hi(), 0);
         outb(line_control_reg(), 0x03);
         outb(fifo_reg(), 0xc7);
         outb(modem_reg(), 0x0b);
+        outb(modem_reg(), 0x1e);
+        outb(data_reg_lo(), 0xae);
+        is_valid = (inb(data_reg_lo()) == 0xae);
         outb(modem_reg(), 0x0f);
     }
     constexpr inline uint16_t SerialPort::irq()
     {
         return portnum + 1;
     }
-    constexpr inline uint16_t SerialPort::data_reg()
+    constexpr inline uint16_t SerialPort::data_reg_lo()
     {
         return portnum;
+    }
+    constexpr inline uint16_t SerialPort::data_reg_hi()
+    {
+        return portnum + 1;
     }
     constexpr inline uint16_t SerialPort::line_control_reg()
     {
@@ -56,8 +63,11 @@ namespace serial
 
     void SerialPort::putc(char c)
     {
-        while ((inb(line_status_reg()) & 0x20) == 0)
-            ;
+        volatile uint8_t dat = 0;
+        do
+        {
+            dat = serial::inb(line_status_reg()) & 0x20;
+        } while (dat == 0);
         outb(portnum, c);
     }
 
@@ -67,6 +77,11 @@ namespace serial
         {
             putc(*(s++));
         }
+    }
+
+    void SerialPort::printf(const char *fmt)
+    {
+        writestr(fmt);
     }
 
     toStrResult itos(int64_t a)
@@ -83,7 +98,7 @@ namespace serial
             res.data[indx++] = '-';
             a = -a;
         }
-        int b = a;
+        int64_t b = a;
         while (b > 0)
         {
             indx++;
