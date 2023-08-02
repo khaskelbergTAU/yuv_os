@@ -1,1 +1,2 @@
-add_library(interrupts STATIC interrupts.cpp)
+file(GLOB CPP_SRCS *.cpp)
+add_library(interrupts STATIC ${CPP_SRCS})

@@ -3,7 +3,8 @@ execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtbegin.o OUTPU
 execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtend.o OUTPUT_VARIABLE CRTEND_O OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 
-add_executable(kernel.elf boot.s kernel.cpp serial.cpp video.cpp ${libgcc})
+file(GLOB CPP_SRCS *.cpp)
+add_executable(kernel.elf boot.s ${CPP_SRCS} ${libgcc})
 
 add_subdirectory(utils)
 add_subdirectory(interrupts)
