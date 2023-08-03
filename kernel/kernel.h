@@ -4,6 +4,15 @@
 #include "video.h"
 #include "serial.h"
 #include "memory/paging.h"
+#include "memory/gdt.h"
 #include "utils/debug.h"
+#include "utils/string.h"
+
+extern "C"
+{
+    char __kernel_start;
+    char __kernel_end;
+}
+
 
 #endif/* _KERNEL_KERNEL_H */

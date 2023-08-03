@@ -22,13 +22,18 @@ namespace serial
         template <typename T, typename... Args>
         void printf(const char *fmt, T val, Args... args)
         {
-            while (*fmt != 0 && *fmt != '%')
+            while (*fmt != 0)
             {
+                if(*(fmt) == '%')
+                {
+                    fmt++;
+                    if(*fmt != '%')
+                    break;
+                }
                 putc(*(fmt++));
             }
             if (*fmt == 0)
                 return;
-            fmt++;
             fmt += format(fmt, val);
             printf(fmt, args...);
         }

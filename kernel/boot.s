@@ -1,6 +1,7 @@
 global _start
 global _enable_paging
-global _load_cr3
+global _load_gdt
+global _reload_segments
 
 extern kernel_main
 extern _init
@@ -39,6 +40,10 @@ times (KERNEL_PAGE_NUMBER - 1) dd 0
 dd 0x83
 times (1024 - KERNEL_PAGE_NUMBER - 1) dd 0
 
+gdtr:
+dw 0 ; For limit storage
+dd 0 ; For base storage
+
 
 
 section .bootloader
@@ -60,22 +65,35 @@ _start:
     jmp _start_in_higher_half
 
 section .text
-_load_cr3:
+
+
+_load_gdt:
     push ebp
     mov ebp, esp
-    push eax
-
-    mov eax, [esp - 0x4]
-    mov cr3, eax
-
-    pop eax
+    push ecx
+    mov cx, [ebp + 0x8]
+    mov [gdtr], cx
+    mov ecx, [ebp + 0xc]
+    mov [gdtr + 2], ecx
+    lgdt [gdtr]
+    pop ecx
     mov esp, ebp
     pop ebp
     ret
 
 
-
-
+_reload_segments:
+   ; Reload CS register containing code selector:
+   jmp   0x08:.reload_CS ; 0x08 is code segment
+.reload_CS:
+   ; Reload data segment registers:
+   mov   AX, 0x10 ; 0x10 is data segment
+   mov   DS, AX
+   mov   ES, AX
+   mov   FS, AX
+   mov   GS, AX
+   mov   SS, AX
+   ret
 
 _start_in_higher_half:
     mov esp, stack_top

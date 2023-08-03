@@ -111,7 +111,10 @@ namespace serial
             {
                 res.data[indx++] = '0';
             }
-
+            if(padding == 0)
+            {
+                res.data[indx++] = '0';
+            }
             return res;
         }
         uint64_t b = x;
