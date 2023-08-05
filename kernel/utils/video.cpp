@@ -1,6 +1,8 @@
 #include "video.h"
 
-#define POS_INDX(ind) pos[((ind) + (pos_head)) % sizeof(pos) / sizeof(pos[0])]
+#define POS_CALC_INDX(ind) (((ind) + (pos_head)) % POS_SIZE)
+#define POS_INDX(ind) (pos[POS_CALC_INDX(ind)])
+#define POS_SIZE (sizeof(pos) / sizeof(pos[0]))
 
 static inline VGA_COMPOSED_COLOR vga_entry_color(VGA_COLOR fg, VGA_COLOR bg)
 {
@@ -47,7 +49,7 @@ void Video::putc(char c)
     }
     case '\b':
     {
-        if (POS_INDX(VGA_HEIGHT - 1) > 0)
+        if (POS_INDX(VGA_HEIGHT - 1) > 0 and POS_INDX(VGA_HEIGHT - 1) < POS_SIZE - 1)
         {
             write_entry(vga_entry(0, VGA_COLOR::BLACK), --POS_INDX(VGA_HEIGHT - 1), VGA_HEIGHT - 1);
         }
@@ -75,7 +77,7 @@ void Video::putc(char c)
 
 void Video::new_line()
 {
-    pos_head--;
+    pos_head = (pos_head +  (sizeof(pos) / sizeof(pos[0])) - 1) % (sizeof(pos) / sizeof(pos[0]));
     POS_INDX(VGA_HEIGHT - 1) = 0;
     size_t y = 0;
     for (y = 0; y < VGA_HEIGHT - 1; y++)
@@ -93,10 +95,9 @@ void Video::new_line()
 }
 void Video::del_line()
 {
-    pos_head++;
-    // POS_INDX(VGA_HEIGHT - 1) = POS_INDX(VGA_HEIGHT - 2);
-    size_t y = 0;
-    for (y = VGA_HEIGHT - 1; y > 0; y--)
+    pos_head = pos_head + 1 % (sizeof(pos) / sizeof(pos[0]));
+    int y = 0;
+    for (y = VGA_HEIGHT - 2; y >= 0; y--)
     {
         for (size_t x = 0; x < VGA_WIDTH; x++)
         {
@@ -106,7 +107,7 @@ void Video::del_line()
     VGA_ENTRY v = vga_entry(' ', vga_entry_color(VGA_COLOR::BLACK, VGA_COLOR::BLACK));
     for (size_t x = 0; x < VGA_WIDTH; x++)
     {
-        this->videomem[y * VGA_WIDTH + x] = v;
+        this->videomem[x] = v;
     }
 }
 
@@ -138,6 +139,15 @@ void Video::printf(const char *fmt, ...)
 void Video::set_cursor(bool on)
 {
     write_entry(on ? vga_entry( '|', WHITE) : vga_entry(' ', BLACK), POS_INDX(VGA_HEIGHT - 1) + 1, VGA_HEIGHT - 1);
+}
+
+void Video::debug_pos()
+{
+    serial::DEBUG_PORT.printf("pos head is %d\n", pos_head);
+    for(size_t i = 0; i < VGA_HEIGHT; i++)
+    {
+        serial::DEBUG_PORT.printf("pos[%d] = %d and actual index is %d\n", i, POS_INDX(i), POS_CALC_INDX(i));
+    }
 }
 
 Video screen{reinterpret_cast<uint16_t *>(0xc00b8000)};

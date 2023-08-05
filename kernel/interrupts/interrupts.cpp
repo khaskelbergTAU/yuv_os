@@ -3,20 +3,22 @@ namespace interrupts
 {
     using namespace irq_handlers;
     gate_descriptor_t IDT[IDT_SIZE]{};
-    static void register_interrupt(uint32_t index, void (*handler)(interrupt_frame_t *))
+    static void register_routine(uint32_t index, void (*handler)(interrupt_frame_t *), gate_type_e gate_type)
     {
-        IDT[index] = gate_descriptor_t(reinterpret_cast<uintptr_t>(handler), gate_type_e::INTERRUPT_32);
+        IDT[index] = gate_descriptor_t(reinterpret_cast<uintptr_t>(handler), gate_type);
     }
-    static void register_trap(uint32_t index, void (*handler)(interrupt_frame_t *, uint32_t))
+    static void register_routine_error(uint32_t index, void (*handler)(interrupt_frame_t *, uint32_t), gate_type_e gate_type)
     {
-        IDT[index] = gate_descriptor_t(reinterpret_cast<uintptr_t>(handler), gate_type_e::TRAP_32);
+        IDT[index] = gate_descriptor_t(reinterpret_cast<uintptr_t>(handler), gate_type);
     }
     void init_interrupts()
     {
-        register_trap(DIV_ERROR, handle_divide_by_zero);
-        register_interrupt(TIMER, handle_timer);
-        register_interrupt(KEYBOARD, handle_keyboard);
-        register_trap(DOUBLE_FAULT, handle_double_fault);
+        register_routine(DIV_ERROR, handle_divide_by_zero, TRAP_32);
+        register_routine(TIMER, handle_timer, INTERRUPT_32);
+        register_routine(KEYBOARD, handle_keyboard, INTERRUPT_32);
+        register_routine(DOUBLE_FAULT, handle_double_fault, TRAP_32);
+        register_routine_error(GENERAL_PROTECTION_FAULT, handle_gen_prot_fault, TRAP_32);
+        register_routine_error(PAGE_FAULT, handle_page_fault, TRAP_32);
         pic::remap(pic_master_irq, pic_slave_irq);
         pic::unmask(TIMER - pic_master_irq);
         pic::unmask(KEYBOARD - pic_master_irq);

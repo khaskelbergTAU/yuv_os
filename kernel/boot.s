@@ -144,5 +144,5 @@ _start_in_higher_half:
 
 
 cause_interrupt:
-    int 32
+    int 50
     ret

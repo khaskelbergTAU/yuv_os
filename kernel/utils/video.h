@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "utils/string.h"
 #include "printf.h"
+#include "serial.h"
 
 using VGA_ENTRY = uint16_t;
 using VGA_COMPOSED_COLOR = uint8_t;
@@ -41,6 +42,7 @@ public:
     void del_line();
     void printf(const char *fmt, ...);
     void set_cursor(bool on);
+    void debug_pos();
 
 private:
     static const size_t VGA_WIDTH = 80;

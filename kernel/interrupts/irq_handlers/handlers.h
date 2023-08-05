@@ -35,13 +35,13 @@ namespace irq_handlers
         uint32_t eip;
         uint32_t cs;
         uint32_t flags;
-        uint32_t sp;
-        uint32_t ss;
     };
-    void handle_divide_by_zero(interrupt_frame_t *frame, uint32_t error_code);
+    void handle_divide_by_zero(interrupt_frame_t *frame);
     void handle_timer(interrupt_frame_t *frame);
     void handle_keyboard(interrupt_frame_t *frame);
-    void handle_double_fault(interrupt_frame_t * /* frame */, uint32_t error_code);
+    void handle_double_fault(interrupt_frame_t * frame);
+    void handle_gen_prot_fault(interrupt_frame_t *  frame, uint32_t error_code);
+    void handle_page_fault(interrupt_frame_t * frame, uint32_t error_code);
 }
 
 
