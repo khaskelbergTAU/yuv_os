@@ -2,6 +2,8 @@ global _start
 global _enable_paging
 global _load_gdt
 global _reload_segments
+global _load_cr3
+global level4table
 
 extern kernel_main
 extern _init
@@ -71,9 +73,9 @@ _load_gdt:
     push ebp
     mov ebp, esp
     push ecx
-    mov cx, [ebp + 0x8]
+    mov cx, [ebp + 0xc]
     mov [gdtr], cx
-    mov ecx, [ebp + 0xc]
+    mov ecx, [ebp + 0x8]
     mov [gdtr + 2], ecx
     lgdt [gdtr]
     pop ecx
@@ -94,6 +96,17 @@ _reload_segments:
    mov   GS, AX
    mov   SS, AX
    ret
+
+_load_cr3:
+    push ebp
+    mov ebp, esp
+    push ecx
+    mov ecx, [ebp + 0x8]
+    mov cr3, ecx
+    pop ecx
+    mov esp, ebp
+    pop ebp
+    ret
 
 _start_in_higher_half:
     mov esp, stack_top

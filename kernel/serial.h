@@ -68,7 +68,7 @@ namespace serial
         {
             int read_amt = 0;
             int padding = 0;
-            uint64_t ext_val = static_cast<uint64_t>((uintptr_t)val);
+            uint64_t ext_val = static_cast<uint64_t>((uintptr_t)val); // this truncates 32 bit values. fml
             switch (*(fmt_arg++))
             {
             case 'd':

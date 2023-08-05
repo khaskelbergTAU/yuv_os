@@ -30,6 +30,6 @@ extern "C" int kernel_main(directory page_table[1024])
     DEBUG_PORT.printf("The kernel takes up addresses %p to %p\n", _kernel_start, _kernel_end);
     uint64_t res;
     memcpy(&res, &gdt::GDT[1], 8);
-    DEBUG_PORT.printf("The second entry of the gdt is %x:8\n", res);
+    DEBUG_PORT.printf("The second entry of the gdt is %b:32 || %b:32 \n", res >> 4 * 8, res);
     return 0;
 }

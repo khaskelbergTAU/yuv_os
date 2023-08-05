@@ -15,6 +15,7 @@ struct __attribute__((__packed__)) directory
     uint8_t ignored2 : 4;     // bit 8 - 11
     uint32_t page_table : 20; // bit 12 - 31: physical address of 4KB aligned page table referenced by this entry
 };
+static_assert(sizeof(directory) == 4);
 
 struct __attribute__((__packed__)) page
 {
@@ -30,10 +31,12 @@ struct __attribute__((__packed__)) page
     uint8_t ignored2 : 3;     // bit 9 - 11
     uint32_t page_frame : 20; // bit 12 - 31: physical address of 4KB page frame
 };
+static_assert(sizeof(page) == 4);
 extern "C"
 {
     extern void _load_cr3(directory page_table_directory[1024]);
-}
+    extern directory level4table[1024];
+};
 
 
 #endif/* _KERNEL_MEMORY_PAGING_H */
