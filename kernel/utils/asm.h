@@ -1,8 +1,8 @@
-#ifndef _KERNEL_UTILS_IO_ASM_H
-#define _KERNEL_UTILS_IO_ASM_H
+#ifndef _KERNEL_UTILS_ASM_H
+#define _KERNEL_UTILS_ASM_H
 
 #include <stdint.h>
-namespace io
+namespace inline_asm
 {
     inline void outb(uint16_t portnum, uint8_t val)
     {
@@ -19,4 +19,4 @@ namespace io
         return c;
     }
 }
-#endif
+#endif/* _KERNEL_UTILS_ASM_H */

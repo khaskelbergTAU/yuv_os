@@ -1,7 +1,7 @@
 #ifndef _KERNEL_SERIAL_H
 #define _KERNEL_SERIAL_H
 #include <stdint.h>
-#include "io_asm.h"
+#include "asm.h"
 #include "panic.h"
 #include "printf.h"
 namespace serial

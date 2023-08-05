@@ -45,5 +45,10 @@ case "$1" in
     exit -1
     ;;
 esac
+
+if [[ $? -ne 0 ]]; then
+ exit -1
+fi
+
 done
 

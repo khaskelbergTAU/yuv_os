@@ -38,13 +38,18 @@ public:
     void putc(char c);
     void writestr(const char *s);
     void new_line();
+    void del_line();
     void printf(const char *fmt, ...);
+    void set_cursor(bool on);
 
 private:
+    static const size_t VGA_WIDTH = 80;
+    static const size_t VGA_HEIGHT = 25;
     void write_entry(VGA_ENTRY e, unsigned int x, unsigned int y);
     VGA_ENTRY *videomem;
     VGA_COMPOSED_COLOR color;
-    unsigned int pos;
+    size_t pos_head{};
+    uint32_t pos[VGA_HEIGHT]{};
 };
 
 extern Video screen;

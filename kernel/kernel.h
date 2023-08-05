@@ -8,6 +8,7 @@
 #include "utils/debug.h"
 #include "utils/string.h"
 #include "interrupts.h"
+#include "asm.h"
 
 extern "C"
 {

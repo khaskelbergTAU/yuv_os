@@ -5,7 +5,7 @@ namespace serial
     SerialPort DEBUG_PORT{0x3f8};
     SerialPort::SerialPort(uint16_t portnum) : portnum(portnum)
     {
-        using namespace io;
+        using namespace inline_asm;
 
         outb(irq(), 0x0);
         outb(line_control_reg(), 0x80);
@@ -53,9 +53,9 @@ namespace serial
         volatile uint8_t dat = 0;
         do
         {
-            dat = io::inb(line_status_reg()) & 0x20;
+            dat = inline_asm::inb(line_status_reg()) & 0x20;
         } while (dat == 0);
-        io::outb(portnum, c);
+        inline_asm::outb(portnum, c);
     }
 
     void SerialPort::writestr(const char *s)

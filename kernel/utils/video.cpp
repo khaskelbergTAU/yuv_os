@@ -1,7 +1,6 @@
 #include "video.h"
 
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
+#define POS_INDX(ind) pos[((ind) + (pos_head)) % sizeof(pos) / sizeof(pos[0])]
 
 static inline VGA_COMPOSED_COLOR vga_entry_color(VGA_COLOR fg, VGA_COLOR bg)
 {
@@ -13,7 +12,7 @@ static inline VGA_ENTRY vga_entry(unsigned char c, uint8_t color)
     return ((uint16_t)c) | (((uint16_t)color) << 8);
 }
 
-Video::Video(uint16_t *videomem) : videomem(static_cast<VGA_ENTRY *>(videomem)), pos(0)
+Video::Video(uint16_t *videomem) : videomem(static_cast<VGA_ENTRY *>(videomem))
 {
     color = vga_entry_color(VGA_COLOR::BLACK, VGA_COLOR::BLACK);
     clear();
@@ -29,6 +28,7 @@ void Video::clear()
             this->videomem[y * VGA_WIDTH + x] = v;
         }
     }
+    memset(pos, 0, sizeof(pos));
 }
 
 void Video::write_entry(VGA_ENTRY v, unsigned int x, unsigned int y)
@@ -38,25 +38,69 @@ void Video::write_entry(VGA_ENTRY v, unsigned int x, unsigned int y)
 
 void Video::putc(char c)
 {
-    if (c == '\n')
-        new_line();
-    else
+    switch (c)
     {
-        if (pos == VGA_WIDTH)
+    case '\n':
+    {
+        new_line();
+        break;
+    }
+    case '\b':
+    {
+        if (POS_INDX(VGA_HEIGHT - 1) > 0)
+        {
+            write_entry(vga_entry(0, VGA_COLOR::BLACK), --POS_INDX(VGA_HEIGHT - 1), VGA_HEIGHT - 1);
+        }
+        else
+        {
+            del_line();
+        }
+        break;
+    }
+    case '\t':
+    {
+        for (int i = 0; i < 4; i++)
+            putc(' ');
+        break;
+    }
+    default:
+    {
+        if (POS_INDX(VGA_HEIGHT - 1) == VGA_WIDTH)
             new_line();
-        write_entry(vga_entry(c, color), pos++, VGA_HEIGHT - 1);
+        write_entry(vga_entry(c, color), POS_INDX(VGA_HEIGHT - 1)++, VGA_HEIGHT - 1);
+        break;
+    }
     }
 }
 
 void Video::new_line()
 {
-    pos = 0;
+    pos_head--;
+    POS_INDX(VGA_HEIGHT - 1) = 0;
     size_t y = 0;
     for (y = 0; y < VGA_HEIGHT - 1; y++)
     {
         for (size_t x = 0; x < VGA_WIDTH; x++)
         {
             this->videomem[y * VGA_WIDTH + x] = this->videomem[(y + 1) * VGA_WIDTH + x];
+        }
+    }
+    VGA_ENTRY v = vga_entry(' ', vga_entry_color(VGA_COLOR::BLACK, VGA_COLOR::BLACK));
+    for (size_t x = 0; x < VGA_WIDTH; x++)
+    {
+        this->videomem[y * VGA_WIDTH + x] = v;
+    }
+}
+void Video::del_line()
+{
+    pos_head++;
+    // POS_INDX(VGA_HEIGHT - 1) = POS_INDX(VGA_HEIGHT - 2);
+    size_t y = 0;
+    for (y = VGA_HEIGHT - 1; y > 0; y--)
+    {
+        for (size_t x = 0; x < VGA_WIDTH; x++)
+        {
+            this->videomem[(y + 1) * VGA_WIDTH + x] = this->videomem[y * VGA_WIDTH + x];
         }
     }
     VGA_ENTRY v = vga_entry(' ', vga_entry_color(VGA_COLOR::BLACK, VGA_COLOR::BLACK));
@@ -90,6 +134,10 @@ void Video::printf(const char *fmt, ...)
     va_start(arg, fmt);
     vprintf(this, fmt, arg);
     va_end(arg);
+}
+void Video::set_cursor(bool on)
+{
+    write_entry(on ? vga_entry( '|', WHITE) : vga_entry(' ', BLACK), POS_INDX(VGA_HEIGHT - 1) + 1, VGA_HEIGHT - 1);
 }
 
 Video screen{reinterpret_cast<uint16_t *>(0xc00b8000)};

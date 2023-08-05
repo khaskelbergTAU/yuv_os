@@ -8,6 +8,7 @@ struct toStrResult
     char data[128];
 };
 toStrResult itos(int64_t a);
+toStrResult utos(uint64_t a);
 toStrResult itox(uint64_t a, int padding = 0);
 toStrResult itob(uint64_t a, int padding = 0);
 
@@ -58,6 +59,10 @@ void vprintf(T *printer, const char *fmt, va_list arg)
         case 'd':
             i = va_arg(arg, int);
             printer->writestr(itos(i).data);
+            break;
+        case 'u':
+            l = va_arg(arg, int);
+            printer->writestr(utos(l).data);
             break;
         case 'x':
             l = va_arg(arg, int);

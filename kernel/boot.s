@@ -4,7 +4,7 @@ global _load_idt
 global _reload_segments
 global _load_cr3
 global level4table
-global divide_by_zero
+global cause_interrupt
 
 extern kernel_main
 extern _init
@@ -137,12 +137,12 @@ _start_in_higher_half:
     push level4table
     call kernel_main
 
-    cli
-    hlt
+    ;cli
 .loop:
+    hlt
     jmp .loop
 
 
-divide_by_zero:
-    int 0
+cause_interrupt:
+    int 32
     ret

@@ -5,13 +5,14 @@
 #include "video.h"
 #include "serial.h"
 #include "handlers.h"
+#include "pic.h"
 #define IDT_SIZE 256
 namespace interrupts
 {
-    enum irq_num
-    {
-        DIV_ERROR = 0,
-    };
+    using irq_handlers::irq_num;
+    const uint8_t pic_master_irq = 0x20;
+    const uint8_t pic_slave_irq = 0x28;
+    void timer_phase(int hz);
 
     enum gate_type_e
     {
@@ -48,6 +49,8 @@ namespace interrupts
     {
         extern void _load_idt(gate_descriptor_t IDT[IDT_SIZE], uint32_t idt_size);
     }
+    void sti();
+    void cli();
 } // namespace interrupts
 
 #endif

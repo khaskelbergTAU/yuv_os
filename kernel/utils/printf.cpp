@@ -26,6 +26,28 @@ toStrResult itos(int64_t a)
     }
     return res;
 }
+toStrResult utos(uint64_t a)
+{
+    toStrResult res{};
+    if (a == 0)
+    {
+        res.data[0] = '0';
+        return res;
+    }
+    int indx{};
+    uint64_t b = a;
+    while (b > 0)
+    {
+        indx++;
+        b /= 10;
+    }
+    while (a > 0)
+    {
+        res.data[--indx] = (a % 10) + '0';
+        a /= 10;
+    }
+    return res;
+}
 const char *hex_digit_table = "0123456789ABCDEF";
 toStrResult itox(uint64_t x, int padding)
 {
