@@ -14,7 +14,7 @@ case "$1" in
     shift 1
     cd $DIR/build
     rm -rf *
-    cmake -DCMAKE_TOOLCHAIN_FILE=$DIR/toolchain.cmake -DCMAKE_CXX_COMPILER_WORKS=1 -DCMAKE_C_COMPILER_WORKS=1 $DIR
+    cmake -DCMAKE_TOOLCHAIN_FILE=$DIR/toolchain.cmake -DCMAKE_CXX_COMPILER_WORKS=1 -DCMAKE_C_COMPILER_WORKS=1 -GNinja $DIR
     ;;
     "run" )
     case "$2" in
