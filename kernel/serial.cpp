@@ -1,7 +1,7 @@
 #include "serial.h"
+#include <stdarg.h>
 namespace serial
 {
-
 
     SerialPort::SerialPort(uint16_t portnum) : portnum(portnum)
     {
@@ -66,9 +66,82 @@ namespace serial
         }
     }
 
-    void SerialPort::printf(const char *fmt)
+    void SerialPort::printf(const char *fmt, ...)
     {
-        writestr(fmt);
+        const char *cur_char;
+        uint32_t w;
+        uint64_t l;
+        int64_t i;
+        const char *s;
+
+        va_list arg;
+        va_start(arg, fmt);
+        for (cur_char = fmt; *(cur_char) != '\0'; cur_char++)
+        {
+            uint32_t padding = 0;
+            while (*cur_char != '%' && *cur_char != '\0')
+            {
+                putc(*cur_char);
+                cur_char++;
+            }
+            if (*cur_char == 0)
+            {
+                return;
+            }
+            cur_char++;
+            char fmt_char = *cur_char;
+            if ((*(cur_char + 1) == '.') && (*(cur_char + 2) == ':'))
+            {
+                cur_char += 3;
+                while (*(cur_char) <= '9' && *(cur_char) >= '0')
+                {
+                    padding *= 10;
+                    padding += *(cur_char) - '0';
+                    cur_char++;
+                }
+                cur_char--;
+                if (*cur_char == 0)
+                {
+                    return;
+                }
+            }
+            switch (fmt_char)
+            {
+            case 'c':
+                w = va_arg(arg, int);
+                putc(w);
+                break;
+            case 'd':
+                i = va_arg(arg, int);
+                writestr(itos(i).data);
+                break;
+            case 'x':
+                l = va_arg(arg, int);
+                writestr(itox(l, padding).data);
+                break;
+            case 'b':
+                l = va_arg(arg, int);
+                writestr(itob(l, padding).data);
+                break;
+            case 'p':
+                w = va_arg(arg, int);
+                writestr(itox(w, sizeof(void *) * 2).data);
+                break;
+            case 's':
+                s = va_arg(arg, const char *);
+                writestr(s);
+                break;
+            case '%':
+                putc('%');
+                break;
+            default:
+                writestr("Invalid printf specifier!!!\n Panicing . . . .");
+                kernel_panic();
+                break;
+            }
+        }
+
+        va_end(arg);
     }
 
     toStrResult itos(int64_t a)
@@ -111,7 +184,7 @@ namespace serial
             {
                 res.data[indx++] = '0';
             }
-            if(padding == 0)
+            if (padding == 0)
             {
                 res.data[indx++] = '0';
             }
