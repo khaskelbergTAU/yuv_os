@@ -1,8 +1,11 @@
-#ifndef VIDEO_H
-#define VIDEO_H
+#ifndef _KERNEL_UTILS_VIDEO_H
+#define _KERNEL_UTILS_VIDEO_H
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "utils/string.h"
+#include "printf.h"
+
 using VGA_ENTRY = uint16_t;
 using VGA_COMPOSED_COLOR = uint8_t;
 enum VGA_COLOR
@@ -29,13 +32,13 @@ class Video
 {
 public:
     Video(uint16_t *videomem);
-    ~Video();
     void clear();
     void set_color(VGA_COLOR fg, VGA_COLOR bg);
     void write(const char *p, size_t len);
     void putc(char c);
     void writestr(const char *s);
     void new_line();
+    void printf(const char *fmt, ...);
 
 private:
     void write_entry(VGA_ENTRY e, unsigned int x, unsigned int y);
@@ -44,4 +47,6 @@ private:
     unsigned int pos;
 };
 
-#endif
+extern Video screen;
+
+#endif/* _KERNEL_UTILS_VIDEO_H */

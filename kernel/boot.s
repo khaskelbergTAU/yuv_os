@@ -1,9 +1,10 @@
 global _start
-global _enable_paging
 global _load_gdt
+global _load_idt
 global _reload_segments
 global _load_cr3
 global level4table
+global divide_by_zero
 
 extern kernel_main
 extern _init
@@ -45,6 +46,9 @@ times (1024 - KERNEL_PAGE_NUMBER - 1) dd 0
 gdtr:
 dw 0 ; For limit storage
 dd 0 ; For base storage
+idtr:
+dw 0 ; For limit storage
+dd 0 ; For base storage
 
 
 
@@ -83,6 +87,19 @@ _load_gdt:
     pop ebp
     ret
 
+_load_idt:
+    push ebp
+    mov ebp, esp
+    push ecx
+    mov cx, [ebp + 0xc]
+    mov [idtr], cx
+    mov ecx, [ebp + 0x8]
+    mov [idtr + 2], ecx
+    lidt [idtr]
+    pop ecx
+    mov esp, ebp
+    pop ebp
+    ret
 
 _reload_segments:
    ; Reload CS register containing code selector:
@@ -124,3 +141,8 @@ _start_in_higher_half:
     hlt
 .loop:
     jmp .loop
+
+
+divide_by_zero:
+    int 0
+    ret

@@ -2,7 +2,12 @@
 #define _KERNEL_MEMORY_GDT_H
 #include <stdint.h>
 #include "../utils/string.h"
-
+#define KERNEL_CODE_SELECTOR 1
+#define KERNEL_DATA_SELECTOR 2
+#define USER_CODE_SELECTOR 3
+#define USER_DATA_SELECTOR 4
+#define TASK_STATE_SEGMENT 5
+#define GDT_SIZE 6
 
 namespace gdt
 {
@@ -73,7 +78,7 @@ struct __attribute__((packed)) gdt_entry_t
 
 static_assert(sizeof(gdt_entry_t) == 8);
 
-extern gdt_entry_t GDT[64];
+extern gdt_entry_t GDT[GDT_SIZE];
 
 void init_gdt();
 } // namespace gdt

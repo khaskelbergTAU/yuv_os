@@ -7,6 +7,7 @@
 #include "memory/gdt.h"
 #include "utils/debug.h"
 #include "utils/string.h"
+#include "interrupts.h"
 
 extern "C"
 {

@@ -3,25 +3,24 @@
 char *_kernel_start = &__kernel_start;
 char *_kernel_end = &__kernel_end;
 
-serial::SerialPort DEBUG_PORT{0x3f8};
-
 extern "C" int kernel_main(directory page_table[1024])
 {
+    using namespace serial;
     gdt::init_gdt();
-    Video v{reinterpret_cast<uint16_t *>(0xc00b8000)};
-    v.clear();
-    v.set_color(VGA_COLOR::WHITE, VGA_COLOR::BLACK);
-    v.writestr("Hello, World!\n");
+    interrupts::init_interrupts();
+    screen.clear();
+    screen.set_color(VGA_COLOR::WHITE, VGA_COLOR::BLACK);
+    screen.writestr("Hello, World!\n");
 
-    v.writestr("is this thing working?\n");
-    v.writestr("Checking If port is valid...\n");
+    screen.writestr("is this thing working?\n");
+    screen.writestr("Checking If port is valid...\n");
     if(DEBUG_PORT.valid())
     {
-        v.writestr("Port seems to be valid.\n");
+        screen.printf("Port seems to be valid.\nport number is %x\n", DEBUG_PORT.get_portnum());
     }
     else
     {
-        v.writestr("nope. port is broken.\n");
+        screen.writestr("nope. port is broken.\n");
         return -1;
     }
 

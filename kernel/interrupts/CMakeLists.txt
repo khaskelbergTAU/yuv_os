@@ -1,2 +1,5 @@
-file(GLOB CPP_SRCS *.cpp)
+file(GLOB CPP_SRCS CONFIGURE_DEPENDS *.h *.cpp)
 add_library(interrupts STATIC ${CPP_SRCS})
+add_subdirectory(irq_handlers)
+target_link_libraries(interrupts utils irq_handlers)
+target_include_directories(interrupts INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

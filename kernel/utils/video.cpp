@@ -1,9 +1,4 @@
 #include "video.h"
-#include "utils/string.h"
-#include "serial.h"
-
-extern serial::SerialPort DEBUG_PORT;
-
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -36,7 +31,6 @@ void Video::clear()
     }
 }
 
-Video::~Video() {}
 void Video::write_entry(VGA_ENTRY v, unsigned int x, unsigned int y)
 {
     this->videomem[y * VGA_WIDTH + x] = v;
@@ -89,3 +83,13 @@ void Video::writestr(const char *p)
 {
     write(p, strlen(p));
 }
+
+void Video::printf(const char *fmt, ...)
+{
+    va_list arg;
+    va_start(arg, fmt);
+    vprintf(this, fmt, arg);
+    va_end(arg);
+}
+
+Video screen{reinterpret_cast<uint16_t *>(0xc00b8000)};
