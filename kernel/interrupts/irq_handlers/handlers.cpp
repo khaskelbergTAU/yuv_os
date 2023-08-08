@@ -84,13 +84,13 @@ namespace irq_handlers
         DEBUG_PORT.printf("Oops! double fault!!\n");
         kernel_panic();
     }
-    void __attribute__((interrupt)) handle_gen_prot_fault(interrupt_frame_t *  frame, uint32_t error_code)
+    void __attribute__((interrupt)) handle_gen_prot_fault(interrupt_frame_t *  frame, uint64_t error_code)
     {
         print_frame(frame);
         DEBUG_PORT.printf("Oops! general protection fault!! segment selector %x\n", error_code);
         kernel_panic();
     }
-    void __attribute((interrupt)) handle_page_fault(interrupt_frame_t * frame, uint32_t error_code)
+    void __attribute((interrupt)) handle_page_fault(interrupt_frame_t * frame, uint64_t error_code)
     {
         print_frame(frame);
         DEBUG_PORT.printf("page fault!! the error code is %x\n", error_code);

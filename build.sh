@@ -1,6 +1,6 @@
 #!/bin/bash
 
-QEMU=qemu-system-i386
+QEMU=qemu-system-x86_64
 
 DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 while ! [[ -z $@ ]]
@@ -14,16 +14,20 @@ case "$1" in
     shift 1
     cd $DIR/build
     rm -rf *
-    cmake -DCMAKE_TOOLCHAIN_FILE=$DIR/toolchain.cmake -DCMAKE_CXX_COMPILER_WORKS=1 -DCMAKE_C_COMPILER_WORKS=1 -GNinja $DIR
+    cmake -DCMAKE_TOOLCHAIN_FILE=$DIR/toolchain.cmake -DCMAKE_CXX_COMPILER_WORKS=1 -DCMAKE_C_COMPILER_WORKS=1 -GNinja $@ $DIR
+    exit 0
     ;;
     "run" )
     case "$2" in
         "gui" )
         shift 2
-	    $QEMU -serial stdio -kernel $DIR/build/kernel/kernel.elf;;
+	    $QEMU -serial stdio -kernel $DIR/build/kernel/kernel.elf -machine type=pc-i440fx-3.1 ;;
         "nogui" )
         shift 2
-	    $QEMU -nographic -kernel $DIR/build/kernel/kernel.elf;;
+	    $QEMU -nographic -kernel $DIR/build/kernel/kernel.elf -machine type=pc-i440fx-3.1;;
+        "debug" )
+        shift 2
+	    $QEMU -S -s -serial stdio -kernel $DIR/build/kernel/kernel.elf -machine type=pc-i440fx-3.1;;
         "disk" )
         shift 2
 	    cp $DIR/build/kernel/kernel.elf $DIR/isodir/boot/kernel.elf
@@ -32,7 +36,7 @@ case "$1" in
 	    $QEMU -serial stdio -cdrom $DIR/build/myos.iso
         ;;
         *)
-        echo "Usage: $0 run <gui|nogui|disk>"
+        echo "Usage: $0 run <gui|nogui|disk|debug>"
         exit -1;;
     esac
     ;;

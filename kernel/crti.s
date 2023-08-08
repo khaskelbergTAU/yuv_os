@@ -1,11 +1,11 @@
 section .init
 global _init
 _init:
-    push ebp
-    mov ebp, esp
+    push rbp
+    mov rbp, rsp
 
 section .fini
 global _fini
 _fini:
-    push ebp
-    mov ebp, esp
+    push rbp
+    mov rbp, rsp

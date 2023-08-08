@@ -1,4 +1,4 @@
-set(libgcc ${TOOLS_DIR}/lib/gcc/i686-elf/12.2.0/libgcc.a)
+set(libgcc ${TOOLS_DIR}/lib/gcc/x86_64-elf/13.2.0/libgcc.a)
 execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtbegin.o OUTPUT_VARIABLE CRTBEGIN_O OUTPUT_STRIP_TRAILING_WHITESPACE )
 execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtend.o OUTPUT_VARIABLE CRTEND_O OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -38,14 +38,12 @@ set(crtn ${CMAKE_BINARY_DIR}/crts/crtn.o)
 
 add_custom_target(crts WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
 COMMAND mkdir -p ${CMAKE_BINARY_DIR}/crts
-COMMAND ${CMAKE_ASM_NASM_COMPILER} crti.s ${CMAKE_ASM_NASM_COMPILER_FLAGS} -o ${crti}
-COMMAND ${CMAKE_ASM_NASM_COMPILER} crtn.s ${CMAKE_ASM_NASM_COMPILER_FLAGS} -o ${crtn}
+COMMAND ${CMAKE_ASM_NASM_COMPILER} crti.s -f elf64 -o ${crti}
+COMMAND ${CMAKE_ASM_NASM_COMPILER} crtn.s -f elf64 -o ${crtn}
 COMMENT "compiling crt[i|n].s" VERBATIM)
 
 
 add_dependencies(kernel.elf crts)
 target_link_libraries(kernel.elf PUBLIC utils ${libgcc} interrupts memory)
 
-set(CMAKE_CXX_LINKER ${TOOLS_DIR}/bin/i686-elf-gcc)
-
-set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINKER} <CMAKE_CXX_LINK_FLAGS> <FLAGS> <LINK_FLAGS> ${crti} ${CRTBEGIN_O} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> ${CRTEND_O} ${crtn}" )
+set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_C_COMPILER} <CMAKE_CXX_LINK_FLAGS> <FLAGS> <LINK_FLAGS> ${crti} ${CRTBEGIN_O} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> ${CRTEND_O} ${crtn}" )

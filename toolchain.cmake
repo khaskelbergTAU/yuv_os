@@ -3,8 +3,8 @@ set(CMAKE_SYSTEM_PROCESSOR i686)
 
 set(TOOLS_DIR $ENV{HOME}/opt/cross)
 
-set(CMAKE_C_COMPILER ${TOOLS_DIR}/bin/i686-elf-gcc)
-set(CMAKE_CXX_COMPILER ${TOOLS_DIR}/bin/i686-elf-g++)
+set(CMAKE_C_COMPILER ${TOOLS_DIR}/bin/x86_64-elf-gcc)
+set(CMAKE_CXX_COMPILER ${TOOLS_DIR}/bin/x86_64-elf-g++)
 
 set(CMAKE_FIND_ROOT_PATH ${TOOLS_DIR})
 

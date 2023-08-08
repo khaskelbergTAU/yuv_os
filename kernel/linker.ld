@@ -1,8 +1,11 @@
 ENTRY(_start)
 
+KERNEL_START = 0xffffffff80000000;
+KERNEL_OFFSET = 0x100000;
+TABLES_OFFSET = 0x009000;
 SECTIONS {
 
-    . = 0x100000;
+    . = KERNEL_OFFSET;
 
     .multiboot : {
         *(.multiboot)
@@ -12,18 +15,24 @@ SECTIONS {
         *(.bootloader)
     }
 
-    . += 0xc0000000;
+    . += KERNEL_START;
     __kernel_start = .;
 
-    .text : AT(ADDR(.text) - 0xc0000000) {
+    . = KERNEL_START + TABLES_OFFSET;
+    .tables : AT(ADDR(.tables) - KERNEL_START) {
+        *(.tables)
+    }
+    . += 0x4000;
+
+    .text : AT(ADDR(.text) - KERNEL_START) {
         *(.text)
     }
 
-    .rodata ALIGN(4K) : AT(ADDR(.rodata)-0xC0000000){
+    .rodata ALIGN(4K) : AT(ADDR(.rodata) - KERNEL_START){
         *(.data)
     }
 
-    .bss ALIGN(4K) : AT(ADDR(.bss)-0xC0000000){
+    .bss ALIGN(4K) : AT(ADDR(.bss) - KERNEL_START){
         *(COMMON)
         *(.bss)
     }

@@ -4,3 +4,5 @@
 isodir/boot/grub/grub.cfg
 .gdb_history
 build/
+LongModeDirectly.asm
+Main.asm

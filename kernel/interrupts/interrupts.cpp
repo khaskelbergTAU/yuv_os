@@ -7,7 +7,7 @@ namespace interrupts
     {
         IDT[index] = gate_descriptor_t(reinterpret_cast<uintptr_t>(handler), gate_type);
     }
-    static void register_routine_error(uint32_t index, void (*handler)(interrupt_frame_t *, uint32_t), gate_type_e gate_type)
+    static void register_routine_error(uint32_t index, void (*handler)(interrupt_frame_t *, uint64_t), gate_type_e gate_type)
     {
         IDT[index] = gate_descriptor_t(reinterpret_cast<uintptr_t>(handler), gate_type);
     }

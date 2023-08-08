@@ -40,8 +40,8 @@ namespace irq_handlers
     void handle_timer(interrupt_frame_t *frame);
     void handle_keyboard(interrupt_frame_t *frame);
     void handle_double_fault(interrupt_frame_t * frame);
-    void handle_gen_prot_fault(interrupt_frame_t *  frame, uint32_t error_code);
-    void handle_page_fault(interrupt_frame_t * frame, uint32_t error_code);
+    void handle_gen_prot_fault(interrupt_frame_t *  frame, uint64_t error_code);
+    void handle_page_fault(interrupt_frame_t * frame, uint64_t error_code);
 }
 
 
