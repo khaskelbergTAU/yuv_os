@@ -1,4 +1,4 @@
-global _start
+global _start:function
 global _load_gdt
 global _load_idt
 global _reload_segments
@@ -17,34 +17,41 @@ extern __kernel_end
 %define CODE_SEG     0x0008
 %define DATA_SEG     0x0010
 %define PML4_ADDR 0x109000
-%define PDPT_ADDR 0x110000
-%define PD_ADDR 0x111000
-%define PT_ADDR 0x112000
+%define PDPT_ADDR 0x10a000
+%define PD_ADDR 0x10b000
+%define PT_ADDR 0x10c000
 %define KERNEL_VIRTUAL_BASE 0xFFFFFFFF80000000
 %define KERNEL_PML4_ENTRY ((KERNEL_VIRTUAL_BASE >> 39) & 0b111111111)
 %define KERNEL_PDPT_ENTRY ((KERNEL_VIRTUAL_BASE >> 30) & 0b111111111)
 %define KERNEL_PD_ENTRY   ((KERNEL_VIRTUAL_BASE >> 21) & 0b111111111)
 %define KERNEL_PT_ENTRY   ((KERNEL_VIRTUAL_BASE >> 12) & 0b111111111)
+%define MULTIBOOT2_HEADER_MAGIC 0xe85250d6
+%define MULTIBOOT_ARCHITECTURE_I386  0
+%define MULTIBOOT_TAG_TYPE_END               0
+%define MULTIBOOT_HEADER_TAG_END  0
 
 
-ALIGN_FLAG equ 1<<0
-MEMINFO equ 1<<1
-FLAGS equ ALIGN_FLAG | MEMINFO
-MAGIC equ 0x1badb002
-CHECKSUM equ -(MAGIC + FLAGS)
-KERNEL_STACK_SIZE equ 0x4000
-
-
-
+HEADER_LENGTH equ header_end - header_start
+CHECKSUM equ -(MULTIBOOT2_HEADER_MAGIC + MULTIBOOT_ARCHITECTURE_I386 + HEADER_LENGTH)
 section .multiboot
-align 4
-dd MAGIC
-dd FLAGS
+
+header_start:
+dd MULTIBOOT2_HEADER_MAGIC
+dd MULTIBOOT_ARCHITECTURE_I386
+dd HEADER_LENGTH
 dd CHECKSUM
-[BITS 64]
+
+dw MULTIBOOT_HEADER_TAG_END
+dw 0
+dd 8
+header_end:
 
 
 section .bss
+[BITS 64]
+
+KERNEL_STACK_SIZE equ 0x4000
+
 align 16
 stack_bottom:
 resb KERNEL_STACK_SIZE
@@ -90,7 +97,6 @@ dd 0 ; For base storage
 section .bootloader
 [BITS 32]
 
-
 IDT:
 dw 0
 dd 0
@@ -124,6 +130,25 @@ _start:
     mov [edx], eax
 
 
+    xor eax, eax
+    mov ecx, 4096
+    or eax, PAGE_PRESENT | PAGE_WRITE
+    mov edx, PT_ADDR
+pt_loop:
+
+    mov [edx], eax
+    lea edx, [edx + KERNEL_PT_ENTRY]
+    mov [edx], eax
+    dec ecx
+    add eax, 0x1000
+    add edx, 8
+    cmp ecx, 0
+    jg pt_loop
+
+
+
+
+
         ; Disable IRQs
     mov al, 0xFF                      ; Out 0xFF to 0xA1 and 0x21 to disable all IRQs.
     out 0xA1, al
@@ -150,7 +175,17 @@ _start:
  
     lgdt [GDT.Pointer - KERNEL_VIRTUAL_BASE]                ; Load GDT.Pointer defined below.
  
-    jmp CODE_SEG:(_start_in_higher_half - KERNEL_VIRTUAL_BASE)             ; Load CS with 64 bit segment and flush the instruction cache
+[BITS 64]
+    mov rax, 0x08
+    push rax
+    lea rax, [rel ._start_64]
+    push rax
+    retf
+    ._start_64:
+    cli
+    hlt
+    jmp _start_in_higher_half
+
 
 [BITS 64]
 section .text

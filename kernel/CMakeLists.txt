@@ -47,3 +47,12 @@ add_dependencies(kernel.elf crts)
 target_link_libraries(kernel.elf PUBLIC utils ${libgcc} interrupts memory)
 
 set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_C_COMPILER} <CMAKE_CXX_LINK_FLAGS> <FLAGS> <LINK_FLAGS> ${crti} ${CRTBEGIN_O} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> ${CRTEND_O} ${crtn}" )
+
+add_custom_command(OUTPUT myos.iso
+COMMAND mkdir -p isodir/boot/grub
+COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/grub.cfg isodir/boot/grub/grub.cfg
+COMMAND cp kernel.elf isodir/boot/kernel.elf
+COMMAND ${CMAKE_GRUB_COMMAND} -o myos.iso isodir
+DEPENDS kernel.elf
+BYPRODUCTS isodir/boot/grub/grub.cfg isodir/boot/kernel.elf)
+add_custom_target(iso ALL DEPENDS myos.iso)

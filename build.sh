@@ -3,13 +3,15 @@
 QEMU=qemu-system-x86_64
 
 DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+ISO=$DIR/build/kernel/myos.iso
 while ! [[ -z $@ ]]
 do
 echo running stage $1
 case "$1" in
     "build" )
     shift 1
-    cmake --build $DIR/build;;
+    cmake --build $DIR/build
+    ;;
     "configure" )
     shift 1
     cd $DIR/build
@@ -21,19 +23,16 @@ case "$1" in
     case "$2" in
         "gui" )
         shift 2
-	    $QEMU -serial stdio -kernel $DIR/build/kernel/kernel.elf -machine type=pc-i440fx-3.1 ;;
+	    $QEMU -serial stdio -cdrom $ISO -m 1024M ;;
         "nogui" )
         shift 2
-	    $QEMU -nographic -kernel $DIR/build/kernel/kernel.elf -machine type=pc-i440fx-3.1;;
+	    $QEMU -nographic -S -s -serial stdio -cdrom $ISO -m 1024M ;;
         "debug" )
         shift 2
-	    $QEMU -S -s -serial stdio -kernel $DIR/build/kernel/kernel.elf -machine type=pc-i440fx-3.1;;
+	    $QEMU -S -s -serial stdio -cdrom $ISO -m 1024M ;;
         "disk" )
         shift 2
-	    cp $DIR/build/kernel/kernel.elf $DIR/isodir/boot/kernel.elf
-	    cp $DIR/grub.cfg $DIR/isodir/boot/grub/grub.cfg
-	    grub-mkrescue -o $DIR/build/myos.iso $DIR/isodir
-	    $QEMU -serial stdio -cdrom $DIR/build/myos.iso
+	    $QEMU -serial stdio -cdrom $ISO -m 1024M
         ;;
         *)
         echo "Usage: $0 run <gui|nogui|disk|debug>"
