@@ -30,7 +30,7 @@ void Video::clear()
             this->videomem[y * VGA_WIDTH + x] = v;
         }
     }
-    memset(pos, 0, sizeof(pos));
+    std::memset(pos, 0, sizeof(pos));
 }
 
 void Video::write_entry(VGA_ENTRY v, unsigned int x, unsigned int y)
@@ -126,7 +126,7 @@ void Video::write(const char *p, size_t len)
 
 void Video::writestr(const char *p)
 {
-    write(p, strlen(p));
+    write(p, std::strlen(p));
 }
 
 void Video::printf(const char *fmt, ...)
@@ -150,4 +150,4 @@ void Video::debug_pos()
     }
 }
 
-Video screen{reinterpret_cast<uint16_t *>(0xffffff800b8000)};
+Video screen{reinterpret_cast<uint16_t *>(0xffffffff801ff000)};

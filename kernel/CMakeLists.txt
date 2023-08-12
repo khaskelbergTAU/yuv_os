@@ -12,6 +12,8 @@ add_subdirectory(interrupts)
 add_subdirectory(memory)
 add_subdirectory(boot)
 
+set_target_properties(kernel.elf PROPERTIES LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld)
+
 
 target_include_directories(kernel.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

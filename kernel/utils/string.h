@@ -4,7 +4,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
-size_t strlen(const char *str);
-void memcpy(void *dst, const void *src, size_t len);
-void memset(void *dst, uint8_t val, size_t len);
+namespace std
+{
+size_t strlen(const char* str);
+void memcpy(void* dst, const void* src, size_t len);
+void memset(void* dst, uint8_t val, size_t len);
+}
 #endif

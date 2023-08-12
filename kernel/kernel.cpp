@@ -3,7 +3,7 @@
 char *_kernel_start = &__kernel_start;
 char *_kernel_end = &__kernel_end;
 
-extern "C" int kernel_main(directory page_table[1024])
+extern "C" int kernel_main(paging::directory page_table[512])
 {
     using namespace serial;
     //gdt::init_gdt();
@@ -25,7 +25,7 @@ extern "C" int kernel_main(directory page_table[1024])
     }
 
     INFO("System Up!")
-    DEBUG_PORT.printf("the kernel page table value is %b.:32\n", ((uint32_t *)page_table)[0xc0000000 >> 22]);
+    DEBUG_PORT.printf("the kernel page table value is %b.:64\n", ((uint64_t *)page_table)[511]);
     DEBUG_PORT.printf("The kernel takes up addresses %p to %p\n", _kernel_start, _kernel_end);
     return 0;
 }

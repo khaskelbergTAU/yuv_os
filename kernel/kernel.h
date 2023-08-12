@@ -12,6 +12,7 @@
 
 extern "C"
 {
+    extern uintptr_t KERNEL_VIRTUAL_BASE;
     char __kernel_start;
     char __kernel_end;
 }

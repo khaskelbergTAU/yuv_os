@@ -17,12 +17,13 @@ SECTIONS {
 
     . += KERNEL_START;
     __kernel_start = .;
-
-    . = KERNEL_START + TABLES_OFFSET;
-    .tables : AT(ADDR(.tables) - KERNEL_START) {
+    
+    .kernel_mapper : AT(ADDR(.kernel_mapper) - KERNEL_START) {
+        *(.kernel_mapper)
+    }
+    .tables ALIGN(4K) : AT(ADDR(.tables) - KERNEL_START) {
         *(.tables)
     }
-    . += 0x4000;
 
     .text : AT(ADDR(.text) - KERNEL_START) {
         *(.text)
@@ -36,5 +37,7 @@ SECTIONS {
         *(COMMON)
         *(.bss)
     }
+
+    . = ALIGN(4K);
     __kernel_end = .;
 }

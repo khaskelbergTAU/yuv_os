@@ -3,8 +3,7 @@ global _load_gdt
 global _load_idt
 global _reload_segments
 global _load_cr3
-global level4table
-global cause_interrupt
+global KERNEL_VIRTUAL_BASE
 
 extern kernel_main
 extern _init
@@ -16,23 +15,26 @@ extern __kernel_end
 %define NUM_PT_ENTRIES 512
 %define CODE_SEG     0x0008
 %define DATA_SEG     0x0010
-%define PML4_ADDR 0x109000
-%define PDPT_ADDR 0x10a000
-%define PD_ADDR 0x10b000
-%define PT_ADDR 0x10c000
-%define KERNEL_VIRTUAL_BASE 0xFFFFFFFF80000000
-%define KERNEL_PML4_ENTRY ((KERNEL_VIRTUAL_BASE >> 39) & 0b111111111)
-%define KERNEL_PDPT_ENTRY ((KERNEL_VIRTUAL_BASE >> 30) & 0b111111111)
-%define KERNEL_PD_ENTRY   ((KERNEL_VIRTUAL_BASE >> 21) & 0b111111111)
-%define KERNEL_PT_ENTRY   ((KERNEL_VIRTUAL_BASE >> 12) & 0b111111111)
+%define KERNEL_BASE 0xFFFFFFFF80000000
+%define ENTRY(addr, off)  (((addr) >> (off)) & 0b111111111)
+%define PML4_ENTRY(addr) (ENTRY(addr, 39))
+%define PDPT_ENTRY(addr) (ENTRY(addr, 30))
+%define PD_ENTRY(addr) (ENTRY(addr, 21))
+%define PT_ENTRY(addr) (ENTRY(addr, 12))
+%define KERNEL_PML4_ENTRY (PML4_ENTRY(KERNEL_BASE))
+%define KERNEL_PDPT_ENTRY PDPT_ENTRY(KERNEL_BASE)
+%define KERNEL_PD_ENTRY   PD_ENTRY(KERNEL_BASE)
+%define KERNEL_PT_ENTRY   PT_ENTRY(KERNEL_BASE)
 %define MULTIBOOT2_HEADER_MAGIC 0xe85250d6
 %define MULTIBOOT_ARCHITECTURE_I386  0
 %define MULTIBOOT_TAG_TYPE_END               0
 %define MULTIBOOT_HEADER_TAG_END  0
+%define V2P(addr) (addr - KERNEL_VIRTUAL_BASE)
 
 
 HEADER_LENGTH equ header_end - header_start
 CHECKSUM equ -(MULTIBOOT2_HEADER_MAGIC + MULTIBOOT_ARCHITECTURE_I386 + HEADER_LENGTH)
+KERNEL_VIRTUAL_BASE equ KERNEL_BASE
 section .multiboot
 
 header_start:
@@ -117,49 +119,49 @@ dd 0
 
 _start:
     ; set PML4 page table entries
-    mov eax, PDPT_ADDR
+    mov eax, V2P(PDPT)
     or eax, PAGE_PRESENT | PAGE_WRITE
 
-    mov edx, PML4_ADDR
+    mov edx, V2P(PML4)
     mov [edx], eax
     lea edx, [edx + KERNEL_PML4_ENTRY * 8]
     mov [edx], eax
 
     ; set PDPT page table entries
-    mov eax, PD_ADDR
+    mov eax, V2P(PD)
     or eax, PAGE_PRESENT | PAGE_WRITE
 
-    mov edx, PDPT_ADDR
+    mov edx, V2P(PDPT)
     mov [edx], eax
     lea edx, [edx + KERNEL_PDPT_ENTRY * 8]
     mov [edx], eax
 
     ; set PD page table entries
-    mov eax, PT_ADDR
+    mov eax, V2P(PT)
     or eax, PAGE_PRESENT | PAGE_WRITE
 
-    mov edx, PD_ADDR
+    mov edx, V2P(PD)
     mov [edx], eax
     lea edx, [edx + KERNEL_PD_ENTRY * 8] ; KERNEL_PD_ENTRY is actually 0, but im foing this for completeness
     mov [edx], eax
 
 
     xor eax, eax
-    mov ecx, 512
+    mov ecx, 511
     or eax, PAGE_PRESENT | PAGE_WRITE
-    mov edx, PT_ADDR
+    mov edx, V2P(PT)
 pt_loop:
 
     mov [edx], eax
-    lea ebx, [edx + KERNEL_PT_ENTRY * 8]
-    mov [ebx], eax
     dec ecx
     add eax, 0x1000
     add edx, 8
     cmp ecx, 0
     jg pt_loop
 
-
+    mov eax, 0x0b8000
+    or eax, PAGE_PRESENT | PAGE_WRITE
+    mov [edx], eax
 
     ; Disable IRQs
     mov al, 0xFF                      ; Out 0xFF to 0xA1 and 0x21 to disable all IRQs.
@@ -170,7 +172,7 @@ pt_loop:
     mov eax, 10100000b                ; Set the PAE and PGE bit.
     mov cr4, eax
  
-    mov edx, PML4_ADDR                      ; Point CR3 at the PML4.
+    mov edx, V2P(PML4)                      ; Point CR3 at the PML4.
     mov cr3, edx
  
     mov ecx, 0xC0000080               ; Read from the EFER MSR. 
@@ -248,7 +250,8 @@ _start_in_higher_half:
     push rax
     call kernel_main
 
-    ;cli
+    cli
+    hlt
 _reload_segments:
    pushfq
    pop rax
