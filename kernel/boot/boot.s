@@ -118,6 +118,7 @@ dw 0
 dd 0
 
 _start:
+    mov esp, stack_top - KERNEL_VIRTUAL_BASE
     ; set PML4 page table entries
     mov eax, V2P(PDPT)
     or eax, PAGE_PRESENT | PAGE_WRITE
@@ -194,7 +195,7 @@ pt_loop:
     mov ds, eax
     mov es, eax
  
-    jmp 0x08:LONG_MODE
+    jmp CODE_SEG:LONG_MODE
 
 [BITS 64]
 LONG_MODE:
