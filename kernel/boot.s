@@ -48,11 +48,9 @@ header_end:
 
 
 section .bss
-[BITS 64]
-
 KERNEL_STACK_SIZE equ 0x4000
 
-align 16
+align 64
 stack_bottom:
 resb KERNEL_STACK_SIZE
 stack_top:
@@ -78,8 +76,8 @@ GDT:
     dq 0x0000000000000000             ; Null Descriptor - should be present.
  
 .Code:
-    dq 0x00209A0000000000             ; 64-bit code descriptor (exec/read).
-    dq 0x0000920000000000             ; 64-bit data descriptor (read/write).
+    dq 0x00af9a000000ffff             ; 64-bit code descriptor (exec/read).
+    dq 0x00af92000000ffff             ; 64-bit data descriptor (read/write).
  
 ALIGN 4
     dw 0                              ; Padding to make the "address of the GDT" field aligned on a 4-byte boundary
@@ -87,8 +85,8 @@ ALIGN 4
 .Pointer:
     dw $ - GDT - 1                    ; 16-bit Size (Limit) of GDT.
     dq GDT                            ; 32-bit Base Address of GDT. (CPU will zero extend to 64-bit)
-
 ALIGN 4
+
 idtr:
 dw 0 ; For limit storage
 dd 0 ; For base storage
@@ -96,6 +94,22 @@ dd 0 ; For base storage
 
 section .bootloader
 [BITS 32]
+
+align 0x1000
+boot_GDT:
+.Null:
+    dq 0x0000000000000000             ; Null Descriptor - should be present.
+ 
+.Code:
+    dq 0x00af9a000000ffff             ; 64-bit code descriptor (exec/read).
+    dq 0x00af92000000ffff             ; 64-bit data descriptor (read/write).
+ 
+ALIGN 4
+    dw 0                              ; Padding to make the "address of the GDT" field aligned on a 4-byte boundary
+ 
+.Pointer:
+    dw $ - boot_GDT - 1                    ; 16-bit Size (Limit) of GDT.
+    dq boot_GDT                            ; 32-bit Base Address of GDT. (CPU will zero extend to 64-bit)
 
 IDT:
 dw 0
@@ -108,7 +122,7 @@ _start:
 
     mov edx, PML4_ADDR
     mov [edx], eax
-    lea edx, [edx + KERNEL_PML4_ENTRY]
+    lea edx, [edx + KERNEL_PML4_ENTRY * 8]
     mov [edx], eax
 
     ; set PDPT page table entries
@@ -117,7 +131,7 @@ _start:
 
     mov edx, PDPT_ADDR
     mov [edx], eax
-    lea edx, [edx + KERNEL_PDPT_ENTRY]
+    lea edx, [edx + KERNEL_PDPT_ENTRY * 8]
     mov [edx], eax
 
     ; set PD page table entries
@@ -126,19 +140,19 @@ _start:
 
     mov edx, PD_ADDR
     mov [edx], eax
-    lea edx, [edx + KERNEL_PD_ENTRY]
+    lea edx, [edx + KERNEL_PD_ENTRY * 8]
     mov [edx], eax
 
 
     xor eax, eax
-    mov ecx, 4096
+    mov ecx, 512
     or eax, PAGE_PRESENT | PAGE_WRITE
     mov edx, PT_ADDR
 pt_loop:
 
     mov [edx], eax
-    lea edx, [edx + KERNEL_PT_ENTRY]
-    mov [edx], eax
+    lea ebx, [edx + KERNEL_PT_ENTRY * 8]
+    mov [ebx], eax
     dec ecx
     add eax, 0x1000
     add edx, 8
@@ -147,14 +161,10 @@ pt_loop:
 
 
 
-
-
-        ; Disable IRQs
+    ; Disable IRQs
     mov al, 0xFF                      ; Out 0xFF to 0xA1 and 0x21 to disable all IRQs.
     out 0xA1, al
     out 0x21, al
- 
-    lidt [IDT]                        ; Load a zero length IDT so that any NMI causes a triple fault.
  
     ; Enter long mode.
     mov eax, 10100000b                ; Set the PAE and PGE bit.
@@ -173,17 +183,19 @@ pt_loop:
     or ebx,0x80000001                 ; - by enabling paging and protection simultaneously.
     mov cr0, ebx                    
  
-    lgdt [GDT.Pointer - KERNEL_VIRTUAL_BASE]                ; Load GDT.Pointer defined below.
+    mov ebx, boot_GDT.Pointer
+    lgdt [ebx]               
+    mov eax, DATA_SEG
+    mov ss, eax
+    mov gs, eax
+    mov fs, eax
+    mov ds, eax
+    mov es, eax
  
+    jmp 0x08:LONG_MODE
+
 [BITS 64]
-    mov rax, 0x08
-    push rax
-    lea rax, [rel ._start_64]
-    push rax
-    retf
-    ._start_64:
-    cli
-    hlt
+LONG_MODE:
     jmp _start_in_higher_half
 
 
@@ -221,7 +233,7 @@ _start_in_higher_half:
     mov rsp, stack_top
 
     mov rax, PML4
-    mov dword [rax], 0
+    mov qword [rax], 0
     invlpg [0]
 
 
@@ -235,35 +247,3 @@ _start_in_higher_half:
 .loop:
     hlt
     jmp .loop
-
-
-
-[BITS 64]      
-LongMode:
-    mov ax, DATA_SEG
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov ss, ax
- 
-    ; Blank out the screen to a blue color.
-    mov edi, 0xB8000
-    mov rcx, 500                      ; Since we are clearing uint64_t over here, we put the count as Count/4.
-    mov rax, 0x1F201F201F201F20       ; Set the value to set the screen to: Blue background, white foreground, blank spaces.
-    rep stosq                         ; Clear the entire screen. 
- 
-    ; Display "Hello World!"
-    mov edi, 0x00b8000              
- 
-    mov rax, 0x1F6C1F6C1F651F48    
-    mov [edi],rax
- 
-    mov rax, 0x1F6F1F571F201F6F
-    mov [edi + 8], rax
- 
-    mov rax, 0x1F211F641F6C1F72
-    mov [edi + 16], rax
- 
- loops:
-    jmp loops                     ; You should replace this jump to wherever you want to jump to.
