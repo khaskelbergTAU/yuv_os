@@ -57,24 +57,24 @@ void vprintf(T *printer, const char *fmt, va_list arg)
             printer->putc(w);
             break;
         case 'd':
-            i = va_arg(arg, int);
+            i = va_arg(arg, int64_t);
             printer->writestr(itos(i).data);
             break;
         case 'u':
-            l = va_arg(arg, int);
+            l = va_arg(arg, uint64_t);
             printer->writestr(utos(l).data);
             break;
         case 'x':
-            l = va_arg(arg, int);
+            l = va_arg(arg, uint64_t);
             printer->writestr(itox(l, padding).data);
             break;
         case 'b':
-            l = va_arg(arg, int);
+            l = va_arg(arg, uint64_t);
             printer->writestr(itob(l, padding).data);
             break;
         case 'p':
-            w = va_arg(arg, int);
-            printer->writestr(itox(w, sizeof(void *) * 2).data);
+            l = va_arg(arg, uint64_t);
+            printer->writestr(itox(l, sizeof(void *)).data);
             break;
         case 's':
             s = va_arg(arg, const char *);
