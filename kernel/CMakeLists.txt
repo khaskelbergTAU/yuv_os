@@ -4,14 +4,14 @@ execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtend.o OUTPUT_
 
 
 file(GLOB CPP_SRCS CONFIGURE_DEPENDS *.h *.cpp)
-add_executable(kernel.elf boot.s ${CPP_SRCS} ${libgcc})
+add_executable(kernel.elf ${CPP_SRCS} ${libgcc})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(utils)
 add_subdirectory(interrupts)
 add_subdirectory(memory)
+add_subdirectory(boot)
 
-set_property(SOURCE boot.s PROPERTY LANGUAGE ASM_NASM)
 
 target_include_directories(kernel.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -44,7 +44,7 @@ COMMENT "compiling crt[i|n].s" VERBATIM)
 
 
 add_dependencies(kernel.elf crts)
-target_link_libraries(kernel.elf PUBLIC utils ${libgcc} interrupts memory)
+target_link_libraries(kernel.elf PUBLIC utils ${libgcc} interrupts memory boot)
 
 set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_C_COMPILER} <CMAKE_CXX_LINK_FLAGS> <FLAGS> <LINK_FLAGS> ${crti} ${CRTBEGIN_O} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> ${CRTEND_O} ${crtn}" )
 

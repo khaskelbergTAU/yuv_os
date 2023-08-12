@@ -150,4 +150,4 @@ void Video::debug_pos()
     }
 }
 
-Video screen{reinterpret_cast<uint16_t *>(0xc00b8000)};
+Video screen{reinterpret_cast<uint16_t *>(0xffffff800b8000)};

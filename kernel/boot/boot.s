@@ -140,7 +140,7 @@ _start:
 
     mov edx, PD_ADDR
     mov [edx], eax
-    lea edx, [edx + KERNEL_PD_ENTRY * 8]
+    lea edx, [edx + KERNEL_PD_ENTRY * 8] ; KERNEL_PD_ENTRY is actually 0, but im foing this for completeness
     mov [edx], eax
 
 
@@ -231,8 +231,13 @@ _load_cr3:
 
 _start_in_higher_half:
     mov rsp, stack_top
+    mov rax, GDT.Pointer
+    lgdt[rax]
+    call _reload_segments
 
     mov rax, PML4
+    mov qword [rax], 0
+    mov rax, PDPT
     mov qword [rax], 0
     invlpg [0]
 
@@ -244,6 +249,29 @@ _start_in_higher_half:
     call kernel_main
 
     ;cli
+_reload_segments:
+   pushfq
+   pop rax
+   and rax, 1111111111111111111111111111111111111111111111101011111011111111b
+   push rax
+   popfq
+   ; Reload CS register containing code selector:
+   push DATA_SEG
+   push rsp
+   pushfq
+   push CODE_SEG
+   push .reload_CS
+   iretq
+.reload_CS:
+   pop rax
+   ; Reload data segment registers:
+   mov   AX, DATA_SEG 
+   mov   DS, AX
+   mov   ES, AX
+   mov   FS, AX
+   mov   GS, AX
+   mov   SS, AX
+   ret
 .loop:
     hlt
     jmp .loop

@@ -7,7 +7,7 @@ extern "C" int kernel_main(directory page_table[1024])
 {
     using namespace serial;
     //gdt::init_gdt();
-    interrupts::init_interrupts();
+    //interrupts::init_interrupts();
     screen.clear();
     screen.set_color(VGA_COLOR::WHITE, VGA_COLOR::BLACK);
     screen.writestr("Hello, World!\n");
