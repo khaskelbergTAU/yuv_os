@@ -4,14 +4,17 @@ global _load_idt
 global _reload_segments
 global _load_cr3
 global KERNEL_VIRTUAL_BASE
+global PML4
 
 extern kernel_main
 extern _init
 extern __kernel_start
+extern __boot_start
 extern __kernel_end
 
 %define PAGE_PRESENT    (1 << 0)
 %define PAGE_WRITE      (1 << 1)
+%define PAGE_SIZE       (1 << 7)
 %define NUM_PT_ENTRIES 512
 %define CODE_SEG     0x0008
 %define DATA_SEG     0x0010
@@ -128,40 +131,11 @@ _start:
     lea edx, [edx + KERNEL_PML4_ENTRY * 8]
     mov [edx], eax
 
-    ; set PDPT page table entries
-    mov eax, V2P(PD)
-    or eax, PAGE_PRESENT | PAGE_WRITE
-
+    xor eax, eax
+    or eax, PAGE_PRESENT | PAGE_WRITE | PAGE_SIZE
     mov edx, V2P(PDPT)
     mov [edx], eax
     lea edx, [edx + KERNEL_PDPT_ENTRY * 8]
-    mov [edx], eax
-
-    ; set PD page table entries
-    mov eax, V2P(PT)
-    or eax, PAGE_PRESENT | PAGE_WRITE
-
-    mov edx, V2P(PD)
-    mov [edx], eax
-    lea edx, [edx + KERNEL_PD_ENTRY * 8] ; KERNEL_PD_ENTRY is actually 0, but im foing this for completeness
-    mov [edx], eax
-
-
-    xor eax, eax
-    mov ecx, 511
-    or eax, PAGE_PRESENT | PAGE_WRITE
-    mov edx, V2P(PT)
-pt_loop:
-
-    mov [edx], eax
-    dec ecx
-    add eax, 0x1000
-    add edx, 8
-    cmp ecx, 0
-    jg pt_loop
-
-    mov eax, 0x0b8000
-    or eax, PAGE_PRESENT | PAGE_WRITE
     mov [edx], eax
 
     ; Disable IRQs
@@ -170,7 +144,7 @@ pt_loop:
     out 0x21, al
  
     ; Enter long mode.
-    mov eax, 10100000b                ; Set the PAE and PGE bit.
+    mov eax, 10110000b                ; Set the PAE, PGE and PSE bits.
     mov cr4, eax
  
     mov edx, V2P(PML4)                      ; Point CR3 at the PML4.

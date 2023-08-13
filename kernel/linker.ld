@@ -11,16 +11,15 @@ SECTIONS {
         *(.multiboot)
     } 
 
+    __boot_start = .;
     .bootloader : {
         *(.bootloader)
     }
 
     . += KERNEL_START;
+    . = ALIGN(4K);
     __kernel_start = .;
     
-    .kernel_mapper : AT(ADDR(.kernel_mapper) - KERNEL_START) {
-        *(.kernel_mapper)
-    }
     .tables ALIGN(4K) : AT(ADDR(.tables) - KERNEL_START) {
         *(.tables)
     }
