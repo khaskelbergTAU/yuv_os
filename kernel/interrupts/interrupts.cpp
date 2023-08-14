@@ -13,12 +13,12 @@ namespace interrupts
     }
     void init_interrupts()
     {
-        register_routine(DIV_ERROR, handle_divide_by_zero, TRAP_32);
-        register_routine(TIMER, handle_timer, INTERRUPT_32);
-        register_routine(KEYBOARD, handle_keyboard, INTERRUPT_32);
-        register_routine(DOUBLE_FAULT, handle_double_fault, TRAP_32);
-        register_routine_error(GENERAL_PROTECTION_FAULT, handle_gen_prot_fault, TRAP_32);
-        register_routine_error(PAGE_FAULT, handle_page_fault, TRAP_32);
+        register_routine(DIV_ERROR, handle_divide_by_zero, TRAP);
+        register_routine(TIMER, handle_timer, INTERRUPT);
+        register_routine(KEYBOARD, handle_keyboard, INTERRUPT);
+        register_routine(DOUBLE_FAULT, handle_double_fault, TRAP);
+        register_routine_error(GENERAL_PROTECTION_FAULT, handle_gen_prot_fault, TRAP);
+        register_routine_error(PAGE_FAULT, handle_page_fault, TRAP);
         pic::remap(pic_master_irq, pic_slave_irq);
         pic::unmask(TIMER - pic_master_irq);
         pic::unmask(KEYBOARD - pic_master_irq);

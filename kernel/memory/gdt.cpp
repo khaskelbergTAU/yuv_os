@@ -6,25 +6,25 @@ namespace gdt
     static void init_kernel_code_segment(uint32_t ind)
     {
         gdt_entry_access_t access(0, 1, 0, 1, 1, 0);
-        gdt_entry_t entry(0, 0xfffff, 0, 1, 1, access);
+        gdt_entry_t entry(0, 0xfffff, 1, 0, 1, access);
         GDT[ind] = entry;
     }
     static void init_kernel_data_segment(uint32_t ind)
     {
         gdt_entry_access_t access(0, 1, 0, 0, 1, 0);
-        gdt_entry_t entry(0, 0xfffff, 0, 1, 1, access);
+        gdt_entry_t entry(0, 0xfffff, 1, 0, 1, access);
         GDT[ind] = entry;
     }
     static void init_user_code_segment(uint32_t ind)
     {
         gdt_entry_access_t access(0, 1, 0, 1, 1, 3);
-        gdt_entry_t entry(0, 0xfffff, 0, 1, 1, access);
+        gdt_entry_t entry(0, 0xfffff, 1, 0, 1, access);
         GDT[ind] = entry;
     }
     static void init_user_data_segment(uint32_t ind)
     {
         gdt_entry_access_t access(0, 1, 0, 0, 1, 3);
-        gdt_entry_t entry(0, 0xfffff, 0, 1, 1, access);
+        gdt_entry_t entry(0, 0xfffff, 1, 0, 1, access);
         GDT[ind] = entry;
     }
     void init_gdt()

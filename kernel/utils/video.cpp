@@ -49,7 +49,7 @@ void Video::putc(char c)
     }
     case '\b':
     {
-        if (POS_INDX(VGA_HEIGHT - 1) > 0 and POS_INDX(VGA_HEIGHT - 1) < POS_SIZE - 1)
+        if (POS_INDX(VGA_HEIGHT - 1) > 0 and POS_INDX(VGA_HEIGHT - 1) <= VGA_WIDTH)
         {
             write_entry(vga_entry(0, VGA_COLOR::BLACK), --POS_INDX(VGA_HEIGHT - 1), VGA_HEIGHT - 1);
         }
@@ -77,7 +77,7 @@ void Video::putc(char c)
 
 void Video::new_line()
 {
-    pos_head = (pos_head +  (sizeof(pos) / sizeof(pos[0])) - 1) % (sizeof(pos) / sizeof(pos[0]));
+    pos_head = (pos_head + POS_SIZE - 1) % POS_SIZE;
     POS_INDX(VGA_HEIGHT - 1) = 0;
     size_t y = 0;
     for (y = 0; y < VGA_HEIGHT - 1; y++)

@@ -10,12 +10,4 @@
 #include "interrupts.h"
 #include "asm.h"
 
-extern "C"
-{
-    extern uintptr_t KERNEL_VIRTUAL_BASE;
-    char __kernel_start;
-    char __kernel_end;
-}
-
-
 #endif/* _KERNEL_KERNEL_H */

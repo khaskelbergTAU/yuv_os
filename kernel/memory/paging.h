@@ -1,10 +1,11 @@
 #ifndef _KERNEL_MEMORY_PAGING_H
 #define _KERNEL_MEMORY_PAGING_H
 #include <stdint.h>
+#include "utils/video.h"
 
 namespace paging
 {
-struct __attribute__((__packed__)) directory_pointer
+struct __attribute__((__packed__)) PML4_entry
 {
     uint8_t present : 1;      // bit 0: always 1
     uint8_t rw : 1;           // bit 1: read/write
@@ -18,11 +19,23 @@ struct __attribute__((__packed__)) directory_pointer
     uint64_t page_table : 36; // bit 12 - 47: physical address of 4KB aligned page table referenced by this entry
     uint16_t ignored3 : 15; // bits 48 - 62
     uint8_t xd : 1; // bit 63 - execute disable
+    PML4_entry(uint8_t rw, uint8_t us, uint8_t pwt,  uint8_t pcd, uint64_t pdpt_addr, uint8_t xd) :
+                present(1),
+                rw(rw),
+                us(us),
+                pwt(pwt),
+                pcd(pcd),
+                a(0),
+                ignored(0),
+                rsvd(0),
+                ignored2(0),
+                page_table(pdpt_addr >> 12),
+                ignored3(0),
+                xd(xd)
+                {}
 };
-static_assert(sizeof(directory_pointer) == 8);
-
-using level_4_page_map = directory_pointer;
-struct __attribute__((__packed__)) directory
+static_assert(sizeof(PML4_entry) == 8);
+struct __attribute__((__packed__)) PDPT_entry
 {
     uint8_t present : 1;      // bit 0: always 1
     uint8_t rw : 1;           // bit 1: read/write
@@ -30,16 +43,17 @@ struct __attribute__((__packed__)) directory
     uint8_t pwt : 1;          // bit 3: page-level write-through
     uint8_t pcd : 1;          // bit 4: page-level cache disable
     uint8_t a : 1;            // bit 5: accessed
-    uint8_t ignored : 1;      // bit 6:
-    uint8_t ps : 1;           // bit 7: page size, 0=4KB 1=4MB, must be 0 for this struct
+    uint8_t ignored : 1;      // bit 6
+    uint8_t ps : 1;           // bit 7: page size (huge page)
     uint8_t ignored2 : 4;     // bit 8 - 11
     uint64_t page_table : 36; // bit 12 - 47: physical address of 4KB aligned page table referenced by this entry
     uint16_t ignored3 : 15; // bits 48 - 62
     uint8_t xd : 1; // bit 63 - execute disable
 };
-static_assert(sizeof(directory) == 8);
+static_assert(sizeof(PDPT_entry) == 8);
 
-struct __attribute__((__packed__)) page
+using PD_entry = PDPT_entry;
+struct __attribute__((__packed__)) PT_entry
 {
     uint8_t present : 1;      // bit 0: always 1
     uint8_t rw : 1;           // bit 1: read/write
@@ -55,12 +69,11 @@ struct __attribute__((__packed__)) page
     uint16_t ignored3 : 15; // bits 48 - 62
     uint8_t xd : 1; // bit 63 - execute disable
 };
-static_assert(sizeof(page) == 8);
-extern "C"
-{
-    extern void _load_cr3(directory page_table_directory[512]);
-    extern directory level4table[512];
-};
+static_assert(sizeof(PT_entry) == 8);
+
+void map_kernel(uintptr_t kernel_start, uintptr_t kernel_end, PML4_entry old_pml4[512]);
+
+void _load_cr3(PML4_entry pml4[512]);
 
 }
 

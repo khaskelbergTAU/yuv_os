@@ -74,7 +74,7 @@ void vprintf(T *printer, const char *fmt, va_list arg)
             break;
         case 'p':
             l = va_arg(arg, uint64_t);
-            printer->writestr(itox(l, sizeof(void *)).data);
+            printer->writestr(itox(l, sizeof(void *) * 2).data);
             break;
         case 's':
             s = va_arg(arg, const char *);

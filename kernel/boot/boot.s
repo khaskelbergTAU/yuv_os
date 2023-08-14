@@ -126,6 +126,7 @@ _start:
     mov eax, V2P(PDPT)
     or eax, PAGE_PRESENT | PAGE_WRITE
 
+    ; this maps two 1GB huge pages for the kernel. one identity mapping, and another higher-half one. this is temporary.
     mov edx, V2P(PML4)
     mov [edx], eax
     lea edx, [edx + KERNEL_PML4_ENTRY * 8]
@@ -178,39 +179,26 @@ LONG_MODE:
 
 [BITS 64]
 section .text
-_load_idt:
-    push rbp
-    mov rbp, rsp
-    push rcx
+_load_idt: ; rdi - idt addr, si - size
     push rax
     mov rax, idtr
-    mov cx, [rbp + 0xc]
-    mov [rax], cx
-    mov rcx, [rbp + 0x8]
-    mov [rax + 2], rcx
+    mov [rax], si
+    mov [rax + 2], rdi
     lidt [rax]
     pop rax
-    pop rcx
-    mov rsp, rbp
-    pop rbp
     ret
 
-_load_cr3:
-    push rbp
-    mov rbp, rsp
-    push rcx
-    mov rcx, [ebp + 0x8]
-    mov cr3, rcx
-    pop rcx
-    mov rsp, rbp
-    pop rbp
+_load_gdt: ; rdi - gdt addr, si - size
+    push rax
+    mov rax, GDT.Pointer
+    mov [rax], si
+    mov [rax + 2], rdi
+    lgdt [rax]
+    pop rax
     ret
 
 _start_in_higher_half:
     mov rsp, stack_top
-    mov rax, GDT.Pointer
-    lgdt[rax]
-    call _reload_segments
 
     mov rax, PML4
     mov qword [rax], 0
@@ -221,12 +209,13 @@ _start_in_higher_half:
 
     call _init
 
-    mov rax, PML4
-    push rax
+
+    mov rdi, PML4
+    mov rsi, __boot_start + KERNEL_VIRTUAL_BASE
+    mov rdx, __kernel_end
     call kernel_main
 
-    cli
-    hlt
+    jmp hlt_loop
 _reload_segments:
    pushfq
    pop rax
@@ -250,6 +239,6 @@ _reload_segments:
    mov   GS, AX
    mov   SS, AX
    ret
-.loop:
+hlt_loop:
     hlt
-    jmp .loop
+    jmp hlt_loop

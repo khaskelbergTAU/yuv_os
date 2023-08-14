@@ -1,16 +1,14 @@
 #include "kernel.h"
 
-char *_kernel_start = &__kernel_start;
-char *_kernel_end = &__kernel_end;
-
-extern "C" int kernel_main(paging::directory page_table[512])
+extern "C" int kernel_main(paging::PML4_entry page_table[512], uintptr_t kernel_start, uintptr_t kernel_end)
 {
     using namespace serial;
-    //gdt::init_gdt();
-    //interrupts::init_interrupts();
+    gdt::init_gdt();
+    interrupts::init_interrupts();
     screen.clear();
     screen.set_color(VGA_COLOR::WHITE, VGA_COLOR::BLACK);
     screen.writestr("Hello, World!\n");
+    map_kernel(kernel_start, kernel_end, page_table);
 
     screen.writestr("is this thing working?\n");
     screen.writestr("Checking If port is valid...\n");
@@ -25,7 +23,7 @@ extern "C" int kernel_main(paging::directory page_table[512])
     }
 
     INFO("System Up!")
-    DEBUG_PORT.printf("the kernel page table value is %b.:64\n", ((uint64_t *)page_table)[511]);
-    DEBUG_PORT.printf("The kernel takes up addresses %p to %p\n", _kernel_start, _kernel_end);
+    DEBUG_PORT.printf("the kernel page table value is %x.:16\n", ((uint64_t *)page_table)[0x1ff]);
+    DEBUG_PORT.printf("The kernel takes up addresses %p to %p\n", kernel_start, kernel_end);
     return 0;
 }

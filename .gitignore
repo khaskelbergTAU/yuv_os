@@ -6,3 +6,4 @@ isodir/boot/grub/grub.cfg
 build/
 LongModeDirectly.asm
 Main.asm
+**/Makefile

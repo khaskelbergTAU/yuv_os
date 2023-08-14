@@ -38,7 +38,7 @@ namespace irq_handlers
     using namespace serial;
     static void print_frame(interrupt_frame_t * frame)
     {
-        DEBUG_PORT.printf("interrupt_frame_t *\n{\n\teflags:\t%b.:32\n\tcs:\t%x\n\teip:\t%p\n}\n", frame->flags, frame->cs, frame->eip);
+        DEBUG_PORT.printf("interrupt_frame_t *\n{\n\teflags:\t%b.:64\n\tcs:\t%x\n\teip:\t%p\n}\n", frame->flags, frame->cs, frame->eip);
     }
     const uint16_t ps2_data_port = 0x60;
     static inline void pic_EOI(uint32_t irq)
@@ -53,7 +53,7 @@ namespace irq_handlers
     {
         print_frame(frame);
         DEBUG_PORT.printf("what are you doing dividing by zero???\n");
-        kernel_panic();
+        kernel_panic("div by zero :(");
     }
     void __attribute__((interrupt)) handle_timer(interrupt_frame_t * /* frame */)
     {
@@ -82,13 +82,13 @@ namespace irq_handlers
     {
         print_frame(frame);
         DEBUG_PORT.printf("Oops! double fault!!\n");
-        kernel_panic();
+        kernel_panic("double fault.");
     }
     void __attribute__((interrupt)) handle_gen_prot_fault(interrupt_frame_t *  frame, uint64_t error_code)
     {
         print_frame(frame);
         DEBUG_PORT.printf("Oops! general protection fault!! segment selector %x\n", error_code);
-        kernel_panic();
+        kernel_panic("general protection fault.");
     }
     void __attribute((interrupt)) handle_page_fault(interrupt_frame_t * frame, uint64_t error_code)
     {
