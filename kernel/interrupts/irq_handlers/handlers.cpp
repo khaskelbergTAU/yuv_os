@@ -94,5 +94,6 @@ namespace irq_handlers
     {
         print_frame(frame);
         DEBUG_PORT.printf("page fault!! the error code is %x\n", error_code);
+        kernel_panic("page fault.");
     }
 }

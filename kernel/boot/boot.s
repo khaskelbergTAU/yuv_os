@@ -3,8 +3,6 @@ global _load_gdt
 global _load_idt
 global _reload_segments
 global _load_cr3
-global KERNEL_VIRTUAL_BASE
-global PML4
 
 extern kernel_main
 extern _init
@@ -18,16 +16,12 @@ extern __kernel_end
 %define NUM_PT_ENTRIES 512
 %define CODE_SEG     0x0008
 %define DATA_SEG     0x0010
-%define KERNEL_BASE 0xFFFFFFFF80000000
+%define KERNEL_VIRTUAL_BASE 0xFFFFFFFF80000000
 %define ENTRY(addr, off)  (((addr) >> (off)) & 0b111111111)
 %define PML4_ENTRY(addr) (ENTRY(addr, 39))
 %define PDPT_ENTRY(addr) (ENTRY(addr, 30))
-%define PD_ENTRY(addr) (ENTRY(addr, 21))
-%define PT_ENTRY(addr) (ENTRY(addr, 12))
-%define KERNEL_PML4_ENTRY (PML4_ENTRY(KERNEL_BASE))
-%define KERNEL_PDPT_ENTRY PDPT_ENTRY(KERNEL_BASE)
-%define KERNEL_PD_ENTRY   PD_ENTRY(KERNEL_BASE)
-%define KERNEL_PT_ENTRY   PT_ENTRY(KERNEL_BASE)
+%define KERNEL_PML4_ENTRY (PML4_ENTRY(KERNEL_VIRTUAL_BASE))
+%define KERNEL_PDPT_ENTRY (PDPT_ENTRY(KERNEL_VIRTUAL_BASE))
 %define MULTIBOOT2_HEADER_MAGIC 0xe85250d6
 %define MULTIBOOT_ARCHITECTURE_I386  0
 %define MULTIBOOT_TAG_TYPE_END               0
@@ -37,7 +31,6 @@ extern __kernel_end
 
 HEADER_LENGTH equ header_end - header_start
 CHECKSUM equ -(MULTIBOOT2_HEADER_MAGIC + MULTIBOOT_ARCHITECTURE_I386 + HEADER_LENGTH)
-KERNEL_VIRTUAL_BASE equ KERNEL_BASE
 section .multiboot
 
 header_start:
@@ -210,6 +203,7 @@ _start_in_higher_half:
     call _init
 
 
+    mov rcx, KERNEL_VIRTUAL_BASE
     mov rdi, PML4
     mov rsi, __boot_start + KERNEL_VIRTUAL_BASE
     mov rdx, __kernel_end
