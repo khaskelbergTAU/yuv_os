@@ -41,6 +41,7 @@ public:
     void new_line();
     void del_line();
     void printf(const char *fmt, ...);
+    void printf();
     void set_cursor(bool on);
     void debug_pos();
 

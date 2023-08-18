@@ -129,6 +129,8 @@ void Video::writestr(const char *p)
     write(p, std::strlen(p));
 }
 
+void Video::printf() {}
+
 void Video::printf(const char *fmt, ...)
 {
     va_list arg;

@@ -9,5 +9,6 @@
 #include "utils/string.h"
 #include "interrupts.h"
 #include "asm.h"
+#include "multiboot/multiboot2.h"
 
 #endif/* _KERNEL_KERNEL_H */

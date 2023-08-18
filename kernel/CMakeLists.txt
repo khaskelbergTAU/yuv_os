@@ -11,6 +11,7 @@ add_subdirectory(utils)
 add_subdirectory(interrupts)
 add_subdirectory(memory)
 add_subdirectory(boot)
+add_subdirectory(multiboot)
 
 set_target_properties(kernel.elf PROPERTIES LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld)
 
@@ -46,7 +47,7 @@ COMMENT "compiling crt[i|n].s" VERBATIM)
 
 
 add_dependencies(kernel.elf crts)
-target_link_libraries(kernel.elf PUBLIC utils ${libgcc} interrupts memory boot)
+target_link_libraries(kernel.elf PUBLIC utils ${libgcc} interrupts memory boot multiboot)
 
 set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_C_COMPILER} <CMAKE_CXX_LINK_FLAGS> <FLAGS> <LINK_FLAGS> ${crti} ${CRTBEGIN_O} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> ${CRTEND_O} ${crtn}" )
 

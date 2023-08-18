@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-
+#define ZERO_ARR(arr) do { memset(arr, 0, sizeof(arr) / sizeof(arr[0])); } while(0)
 namespace std
 {
 size_t strlen(const char* str);

@@ -23,19 +23,15 @@ case "$1" in
     case "$2" in
         "gui" )
         shift 2
-	    $QEMU -serial stdio -cdrom $ISO -m 1024M ;;
+	    $QEMU -serial stdio -cdrom $ISO -m 1G ;;
         "nogui" )
         shift 2
-	    $QEMU -nographic -S -s -serial stdio -cdrom $ISO -m 1024M ;;
+	    $QEMU -nographic -S -s -serial stdio -cdrom $ISO -m 1G ;;
         "debug" )
         shift 2
-	    $QEMU -S -s -serial stdio -cdrom $ISO -m 1024M ;;
-        "disk" )
-        shift 2
-	    $QEMU -serial stdio -cdrom $ISO -m 1024M
-        ;;
+	    $QEMU -S -s -serial stdio -cdrom $ISO -m 1G ;;
         *)
-        echo "Usage: $0 run <gui|nogui|disk|debug>"
+        echo "Usage: $0 run <gui|nogui|debug>"
         exit -1;;
     esac
     ;;

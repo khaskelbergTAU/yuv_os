@@ -4,6 +4,10 @@
 #include "utils/video.h"
 #include "utils/serial.h"
 #include "utils/string.h"
+#include "utils/datastructs/double_linked_list.h"
+#include "utils/datastructs/dynamic_bitset.h"
+#include "page_list.h"
+#include "utils/singleton.h"
 
 #define TABLE_INDEX(addr, off) ((addr >> off) & 0x1ff)
 #define PML4_INDX(addr) TABLE_INDEX(addr, 39)
@@ -16,10 +20,12 @@
 #define PDPT_ENTRY_MAP_SIZE (PD_ENTRY_MAP_SIZE * NUM_ENTRIES)
 #define PML4_ENTRY_MAP_SIZE (PDPT_ENTRY_MAP_SIZE * NUM_ENTRIES)
 #define PZ(addr) do {std::memset(addr, 0, PAGE_SIZE);} while(0)
+#define PAGE_MAX_ORDER 12
+#define ROUND_UP(x, up) (((x) + (up) - 1) & (-(up)))
+#define PAGE_ROUND_UP(x) ROUND_UP(x, PAGE_SIZE)
 
 namespace paging
 {
-using Page = uint8_t[PAGE_SIZE];
 struct __attribute__((__packed__)) PML4_entry
 {
     uint8_t present : 1;      // bit 0: always 1
@@ -143,35 +149,73 @@ struct __attribute__((__packed__)) PT_entry
                 {}
 };
 static_assert(sizeof(PT_entry) == 8);
-class PageAllocator
+
+template<size_t N>
+class BuddyAllocator
 {
-private:
-    Page *Page_Pool; // a pool of 3 page tables, used for temporary mappings when needed.
-    // these are all variables to track where the kernel pages start and end.
-    // PDPT points at the start of all PDPTs, and so on.
-    PML4_entry *PML4;
-    PDPT_entry *PDPT;
-    PD_entry *PD;
-    PT_entry *PT;
-    uintptr_t FRAME;
-    uintptr_t alloc_end;
-    template<class T>
-    static bool present(T entry) {return entry.present != 0;}
-    PDPT_entry *get_pml4_entry(PML4_entry *pml4, uintptr_t vaddr);
-    PD_entry *get_pdpt_entry(PDPT_entry *pdpt, uintptr_t vaddr);
-    PT_entry *get_pd_entry(PD_entry *pd, uintptr_t vaddr);
-    bool map_pt_entry(PT_entry *pt, uintptr_t vaddr, uintptr_t paddr);
-    void map_addr(uintptr_t vaddr, uintptr_t paddr);
-    uintptr_t tmp_map(uintptr_t paddr);
-    static PDPT_entry *extract_addr(PML4_entry);
-    static PD_entry *extract_addr(PDPT_entry);
-    static PT_entry *extract_addr(PD_entry);
-    static Page *extract_addr(PT_entry);
+    std::dynamic_bitset m_sets[N];
+    uint64_t m_page_count;
+    PageList m_page_lists[N];
 public:
-    void map_kernel(uintptr_t kernel_start, uintptr_t kernel_end, uintptr_t kernel_base);
-    void map(uint8_t *p_addr);
+    BuddyAllocator() = default;
+    BuddyAllocator(uint64_t page_count, uint64_t *bitset_areas[N])
+    : m_page_count(page_count)
+    {
+        for(size_t i = 0; i < N; i++)
+        {
+            m_sets[i] = std::dynamic_bitset(page_count >> (i+1), bitset_areas[i]);
+        }
+    }
+    void *alloc(size_t order)
+    {
+        YUV_ASSERT(order < N, "requested order %u too large, max order %u\n", order, N);
+        PageList &lst = m_page_lists[order];
+        std::dynamic_bitset &set = m_sets[order];
+        if(!lst.empty())
+        {
+            Page *page = lst.pop();
+            set[reinterpret_cast<uintptr_t>(page) >> (order + 12 + 1)].flip();
+        }
+        if(!(set.is_zero()))
+        {
+            uint64_t indx = set.first_set();
+            set[indx].flip();
+            return reinterpret_cast<void *>(indx << (order + 12));
+        }
+        return nullptr;
+    }
 };
 
+
+class PageAllocator : UnsafeSingleton<PageAllocator>
+{
+private:
+    uintptr_t m_kernel_base;
+    uint64_t m_page_count;
+    BuddyAllocator<PAGE_MAX_ORDER> m_allocator;
+    template<class T>
+    static bool present(T entry) {return entry.present != 0;}
+
+
+public:
+    static void paging_init(uintptr_t kernel_base, uintptr_t kernel_end, uint64_t page_count);
+    static uintptr_t V2P(uintptr_t vaddr)
+    {
+        return vaddr - getInstance().m_kernel_base;
+    }
+
+    static uintptr_t P2V(uintptr_t paddr)
+    {
+        return paddr + getInstance().m_kernel_base;
+    }
+
+    static uint64_t page_count() {return getInstance().m_page_count;}
+
+    static void *alloc_page(size_t order)
+    {
+        return getInstance().m_allocator.alloc(order);
+    }
+};
 void _load_cr3(PML4_entry pml4[512]);
 
 }

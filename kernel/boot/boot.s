@@ -150,12 +150,12 @@ _start:
     or eax, 0x00000100                ; Set the LME bit.
     wrmsr
  
-    mov ebx, cr0                      ; Activate long mode -
-    or ebx,0x80000001                 ; - by enabling paging and protection simultaneously.
-    mov cr0, ebx                    
+    mov eax, cr0                      ; Activate long mode -
+    or eax,0x80000001                 ; - by enabling paging and protection simultaneously.
+    mov cr0, eax                    
  
-    mov ebx, boot_GDT.Pointer
-    lgdt [ebx]               
+    mov eax, boot_GDT.Pointer
+    lgdt [eax]               
     mov eax, DATA_SEG
     mov ss, eax
     mov gs, eax
@@ -203,10 +203,12 @@ _start_in_higher_half:
     call _init
 
 
-    mov rcx, KERNEL_VIRTUAL_BASE
     mov rdi, PML4
     mov rsi, __boot_start + KERNEL_VIRTUAL_BASE
     mov rdx, __kernel_end
+    mov rcx, KERNEL_VIRTUAL_BASE
+    mov r8, rbx
+    add r8, KERNEL_VIRTUAL_BASE
     call kernel_main
 
     jmp hlt_loop
