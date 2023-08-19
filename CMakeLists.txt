@@ -6,6 +6,7 @@ project(yuvOS)
 
 enable_language(ASM_NASM)
 
+
 # custom nasm flags
 set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -f elf64 -g -o <OBJECT> <SOURCE>")
 set(OPT_LEVEL -O0)

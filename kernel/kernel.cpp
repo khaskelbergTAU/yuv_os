@@ -7,9 +7,6 @@ extern "C" int kernel_main(paging::PML4_entry page_table[512], uintptr_t kernel_
     gdt::init_gdt();
     interrupts::init_interrupts();
     boot_info info(multiboot2);
-    paging::PageAllocator::paging_init(kernel_virtual_base,
-                                        kernel_end,
-                                        (info.meminfo.mem_upper >> 2) + 0x120);
     screen.clear();
     screen.set_color(VGA_COLOR::WHITE, VGA_COLOR::BLACK);
     screen.writestr("Hello, World!\n");
@@ -26,9 +23,12 @@ extern "C" int kernel_main(paging::PML4_entry page_table[512], uintptr_t kernel_
         return -1;
     }
 
+    paging::PageAllocator::paging_init(kernel_virtual_base,
+                                        kernel_end,
+                                        (info.meminfo.mem_upper >> 2) + 0x120);
     INFO("System Up!")
     DEBUG_PORT.printf("the kernel page table value is %x.:16\n", ((uint64_t *)page_table)[0x1ff]);
-    DEBUG_PORT.printf("The kernel takes up addresses %p to %p\n", kernel_start, kernel_end);
+    DEBUG_PORT.printf("The kernel takes up addresses %p to %p\n", kernel_start, DumbAllocator::getInstance()->mem_end());
     DEBUG_PORT.printf("We have %x memory available.\n", paging::PageAllocator::page_count() * 0x1000);
     void *ptr = paging::PageAllocator::alloc_page(0);
     DEBUG_PORT.printf("the page we got was allocated at %p\n", ptr);

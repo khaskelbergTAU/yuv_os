@@ -26,17 +26,19 @@ SECTIONS {
 
     .text : AT(ADDR(.text) - KERNEL_START) {
         *(.text)
+        *(.text.*)
     }
 
     .rodata ALIGN(4K) : AT(ADDR(.rodata) - KERNEL_START){
         *(.data)
+        *(.rodata.*)
     }
 
     .bss ALIGN(4K) : AT(ADDR(.bss) - KERNEL_START){
         *(COMMON)
         *(.bss)
+        *(.bss.*)
     }
 
-    . = ALIGN(4K);
     __kernel_end = .;
 }

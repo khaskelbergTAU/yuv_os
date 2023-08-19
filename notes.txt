@@ -1,0 +1,1 @@
+i can make my structs templated on the allocator - and create a dumb allocator, that just increments "kernel_end" and doesnt actually free memory
