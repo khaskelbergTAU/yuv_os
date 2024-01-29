@@ -9,7 +9,7 @@ class DumbAllocator : public UnsafeSingleton<DumbAllocator>
     public:
     void init(uintptr_t mem_end);
     void *alloc(size_t alloc_size);
-    void free(){};
+    void free(void *){};
     uintptr_t mem_end() {return m_mem_end;}
 
 };

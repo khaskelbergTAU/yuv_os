@@ -9,6 +9,7 @@ extern _init
 extern __kernel_start
 extern __boot_start
 extern __kernel_end
+extern __cxa_finalize
 
 %define PAGE_PRESENT    (1 << 0)
 %define PAGE_WRITE      (1 << 1)
@@ -210,6 +211,12 @@ _start_in_higher_half:
     mov r8, rbx
     add r8, KERNEL_VIRTUAL_BASE
     call kernel_main
+    sub rsp, 8
+    mov qword [rsp], 0x0
+ 
+    call __cxa_finalize
+ 
+    add rsp, 8
 
     jmp hlt_loop
 _reload_segments:

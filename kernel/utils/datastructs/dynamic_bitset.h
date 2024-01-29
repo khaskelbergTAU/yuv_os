@@ -18,9 +18,12 @@ class dynamic_bitset
     dynamic_bitset(size_t bitcount) : m_bitcount(bitcount)
     {
         size_t alloc_size = ROUND_UP((bitcount >> 3), 8);
-        m_set = reinterpret_cast<uint64_t *>(Allocator::getInstance()->alloc(alloc_size));
+        m_set = reinterpret_cast<uint64_t*>(Allocator::getInstance()->alloc(alloc_size));
         //serial::DEBUG_PORT.printf("this = %p, &m_set = %p, m_set = %p, bitcount = %x, alloc_size = %x.\n", this, &m_set, m_set, bitcount, alloc_size);
-
+    }
+    ~dynamic_bitset()
+    {
+        Allocator::getInstance()->free(m_set);
     }
     bool operator[](size_t pos) const
     {
@@ -64,12 +67,36 @@ class dynamic_bitset
         }
         return true;
     }
+    bool has_zero()
+    {
+        uint64_t indx = 0;
+        for (indx = 0; indx * 64 < m_bitcount - 1; indx++)
+        {
+            if (m_set[indx] != -1ULL)
+            {
+                return true;
+            }
+        }
+        uint64_t remainder = m_bitcount % 64;
+        if (remainder > 0 and ((m_set[indx] & ((1ULL << remainder) - 1ULL)) != ((1ULL << remainder) - 1ULL)))
+        {
+            return true;
+        }
+        return false;
+    }
     void clear()
     {
         for (uint64_t indx = 0; indx * 64 < m_bitcount + 63; indx++)
         {
             m_set[indx] = 0;
             //serial::DEBUG_PORT.printf("this = %p, indx = %d, m_bitcount = %x, &m_set = %p, m_set = %p, writing at %p\n", this, indx, m_bitcount, &m_set, m_set, &m_set[indx]);
+        }
+    }
+    void set()
+    {
+        for (uint64_t indx = 0; indx * 64 < m_bitcount + 63; indx++)
+        {
+            m_set[indx] = -1ULL;
         }
     }
     private:
@@ -120,6 +147,18 @@ class dynamic_bitset
         reference& flip()
         {
             *m_word_p ^= bitmask(m_pos);
+            return *this;
+        }
+
+        reference& set()
+        {
+            *m_word_p |= bitmask(m_pos);
+            return *this;
+        }
+
+        reference& clear()
+        {
+            *m_word_p &= ~bitmask(m_pos);
             return *this;
         }
     };

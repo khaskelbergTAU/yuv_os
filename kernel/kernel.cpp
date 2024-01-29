@@ -32,6 +32,8 @@ extern "C" int kernel_main(paging::PML4_entry page_table[512], uintptr_t kernel_
     DEBUG_PORT.printf("We have %x memory available.\n", paging::PageAllocator::page_count() * 0x1000);
     void *ptr = paging::PageAllocator::alloc_page(0);
     DEBUG_PORT.printf("the page we got was allocated at %p\n", ptr);
+    ptr = paging::PageAllocator::alloc_page(2);
+    DEBUG_PORT.printf("the page we got was allocated at %p\n", ptr);
 
     return 0;
 }

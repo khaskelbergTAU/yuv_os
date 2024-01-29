@@ -157,38 +157,40 @@ class BuddyAllocator
     std::dynamic_bitset<DumbAllocator> m_sets[N];
     uint64_t m_page_count = 0;
     PageList m_page_lists[N];
-    uintptr_t m_kernel_base = 0;
+    uintptr_t m_mem_start = 0;
     public:
     BuddyAllocator() = default;
     BuddyAllocator(uint64_t page_count, uintptr_t kernel_base)
-        : m_page_count(page_count), m_kernel_base(kernel_base)
+        : m_page_count(page_count), m_mem_start(kernel_base)
     {
         for (size_t i = 0; i < N; i++)
         {
-            new (&m_sets[i]) std::dynamic_bitset<DumbAllocator>(page_count >> (i + 1));
+            new (&m_sets[i]) std::dynamic_bitset<DumbAllocator>(page_count >> i);
             m_sets[i].clear();
         }
+        m_mem_start = PAGE_ROUND_UP(DumbAllocator::getInstance()->mem_end());
+        m_page_count -= m_mem_start >> 12;
     }
     void* alloc(size_t order)
     {
         YUV_ASSERT(order < N, "requested order %u too large, max order %u\n", order, N);
         PageList& lst = m_page_lists[order];
         auto& set = m_sets[order];
-        void *retval = nullptr;
+        void* retval = nullptr;
         if (!lst.empty())
         {
             Page* page = lst.pop();
-            set[reinterpret_cast<uintptr_t>(page) >> (order + 12 + 1)].flip();
+            set[reinterpret_cast<uintptr_t>(page) >> (order + 12)].set();
         }
-        for(size_t found_order = order; found_order < N; found_order++)
+        if (set.has_zero())
         {
-            auto& curr_set = m_sets[found_order];
-            if (!(curr_set.is_zero()))
+            uint64_t indx = set.first_clear();
+            for(size_t curr_order = order; curr_order < N; curr_order++)
             {
-                uint64_t indx = curr_set.first_set();
-                curr_set[indx].flip();
-                retval =  reinterpret_cast<void*>(m_kernel_base + (indx << (curr_order + 12)));
+                m_sets[curr_order][indx].set();
+                indx = indx / 2;
             }
+            retval = reinterpret_cast<void*>(m_mem_start + (indx << (order + 12)));
         }
         return retval;
     }

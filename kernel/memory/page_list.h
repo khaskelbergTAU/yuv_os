@@ -11,18 +11,27 @@ class PageList
 {
     struct PageListNode
     {
-        PageListNode *m_prev = nullptr;
-        PageListNode *m_next = nullptr;
+        private:
+        PageListNode* m_prev = nullptr;
+        PageListNode* m_next = nullptr;
+        public:
+        void set_next(PageListNode *next) {m_next = next;}
+        void set_prev(PageListNode *prev) {m_prev = prev;}
+        PageListNode *get_prev() {return m_prev;}
+        PageListNode *get_next() {return m_next;}
+        friend class PageList;
     };
-    PageListNode *m_head = nullptr;
-    PageListNode *m_tail = nullptr;
-public:
-    void insert_first(Page *page);
+    PageListNode* m_head = nullptr;
+    PageListNode* m_tail = nullptr;
+    public:
+    void insert_first(Page* page);
 
-    void unlink(PageListNode *node);
+    void unlink(PageListNode* node);
 
     bool empty();
-    Page *pop();
+    Page* pop();
+    PageListNode* head() { return m_head; }
+    PageListNode* tail() { return m_tail; }
 
 };
 
