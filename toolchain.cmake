@@ -5,6 +5,7 @@ set(TOOLS_DIR $ENV{HOME}/opt/cross)
 
 set(CMAKE_C_COMPILER ${TOOLS_DIR}/bin/x86_64-elf-gcc)
 set(CMAKE_CXX_COMPILER ${TOOLS_DIR}/bin/x86_64-elf-g++)
+set(CMAKE_ASM_NASM_COMPILER ${TOOLS_DIR}/bin/nasm)
 set(CMAKE_GRUB_COMMAND grub-mkrescue)
 
 set(CMAKE_FIND_ROOT_PATH ${TOOLS_DIR})

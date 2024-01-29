@@ -8,7 +8,7 @@ enable_language(ASM_NASM)
 
 
 # custom nasm flags
-set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -f elf64 -g -o <OBJECT> <SOURCE>")
+set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -f elf64 -gdwarf -o <OBJECT> <SOURCE>")
 set(OPT_LEVEL -O0)
 
 add_compile_options(-ffreestanding ${OPT_LEVEL} -Wall -Wextra -fno-exceptions -fno-rtti -fno-plt -fno-pic -Werror -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -g -fdiagnostics-color=always -mcmodel=kernel -fno-pie -no-pie -fno-threadsafe-statics)
