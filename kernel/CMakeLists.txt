@@ -1,4 +1,4 @@
-set(libgcc ${TOOLS_DIR}/lib/gcc/x86_64-elf/13.2.0/libgcc.a)
+execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-libgcc-file-name OUTPUT_VARIABLE libgcc OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtbegin.o OUTPUT_VARIABLE CRTBEGIN_O OUTPUT_STRIP_TRAILING_WHITESPACE )
 execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtend.o OUTPUT_VARIABLE CRTEND_O OUTPUT_STRIP_TRAILING_WHITESPACE)
 
