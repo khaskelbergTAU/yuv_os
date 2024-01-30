@@ -3,6 +3,19 @@ execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtbegin.o OUTPU
 execute_process( COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=crtend.o OUTPUT_VARIABLE CRTEND_O OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 
+set(CRTBEGIN_O_LARGE ${CRTBEGIN_O}.large)
+set(CRTEND_O_LARGE ${CRTEND_O}.large)
+
+# documentation for future me:
+# this was done because for some reason, the default crt{begin, end}.o objects were compiled with a small memory model
+# this means that my higher half kernel didnt play nicely with them
+# i recompiled them with -mcmodel=large, and placed them in the same directory, just called crt{begin, end}.o.large.
+# so this code just uses them instead if they exist.
+if(EXISTS ${CRTBEGIN_O_LARGE})
+    set(CRTBEGIN_O ${CRTBEGIN_O_LARGE})
+    set(CRTEND_O ${CRTEND_O_LARGE})
+endif()
+
 file(GLOB CPP_SRCS CONFIGURE_DEPENDS *.h *.cpp)
 add_executable(kernel.elf ${CPP_SRCS} ${libgcc})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
