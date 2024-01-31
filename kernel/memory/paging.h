@@ -151,6 +151,11 @@ struct __attribute__((__packed__)) PT_entry
 };
 static_assert(sizeof(PT_entry) == 8);
 
+/*
+ * i realised that this allocator is way too complicated for my needs
+ * im leaving what i implemented here in case it becomes useful
+ * for now, ill just use the simple bit set allocator.
+ */
 template<size_t N>
 class BuddyAllocator
 {
@@ -181,14 +186,16 @@ class BuddyAllocator
         {
             Page* page = lst.pop();
             set[reinterpret_cast<uintptr_t>(page) >> (order + 12)].set();
+            return (void *)page;
         }
         if (set.has_zero())
         {
             uint64_t indx = set.first_clear();
+            uint64_t higher_order_indx = indx;
             for(size_t curr_order = order; curr_order < N; curr_order++)
             {
-                m_sets[curr_order][indx].set();
-                indx = indx / 2;
+                m_sets[curr_order][higher_order_indx].set();
+                higher_order_indx /= 2;
             }
             retval = reinterpret_cast<void*>(m_mem_start + (indx << (order + 12)));
         }
@@ -196,13 +203,32 @@ class BuddyAllocator
     }
 };
 
+class BitSetPageAllocator
+{
+private:
+    std::dynamic_bitset<DumbAllocator> pages;
+
+public:
+    BitSetPageAllocator() {}
+    BitSetPageAllocator(uint64_t pagecnt) : pages(pagecnt) {}
+    uint64_t alloc()
+    {
+        uint64_t indx = pages.first_clear();
+        pages[indx].set();
+        return indx << 12;
+    }
+    void free(uint64_t pageaddr)
+    {
+        pages[pageaddr >> 12].clear();
+    }
+};
 
 class PageAllocator : public UnsafeSingleton<PageAllocator>
 {
     private:
     uintptr_t m_kernel_base;
     uint64_t m_page_count;
-    BuddyAllocator<PAGE_MAX_ORDER> m_allocator;
+    BitSetPageAllocator m_allocator;
     template<class T>
     static bool present(T entry) { return entry.present != 0; }
 
@@ -223,9 +249,13 @@ class PageAllocator : public UnsafeSingleton<PageAllocator>
         return getInstance()->m_page_count;
     }
 
-    static void* alloc_page(size_t order)
+    static void *alloc_page()
     {
-        return getInstance()->m_allocator.alloc(order);
+        return (void *)(getInstance()->m_kernel_base + getInstance()->m_allocator.alloc());
+    }
+    static void free_page(void *pageaddr)
+    {
+        getInstance()->m_allocator.free((uint64_t)pageaddr - getInstance()->m_kernel_base);
     }
 };
 void _load_cr3(PML4_entry pml4[512]);

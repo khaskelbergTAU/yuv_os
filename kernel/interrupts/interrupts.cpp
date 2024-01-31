@@ -34,12 +34,12 @@ namespace interrupts
         outb(0x40, divisor & 0xFF); /* Set low byte of divisor */
         outb(0x40, divisor >> 8);   /* Set high byte of divisor */
     }
-    void cli()
+    inline __attribute__((always_inline)) void cli()
     {
         asm("cli");
     }
 
-    void sti()
+    inline __attribute__((always_inline)) void sti()
     {
         asm("sti");
     }

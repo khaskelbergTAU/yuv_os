@@ -62,12 +62,6 @@ times NUM_PT_ENTRIES dq 0
 PDPT:
 times NUM_PT_ENTRIES dq 0
 
-PD:
-times NUM_PT_ENTRIES dq 0
-
-PT:
-times NUM_PT_ENTRIES dq 0
-
 section .data
 align 0x1000
 GDT:

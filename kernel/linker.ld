@@ -20,18 +20,20 @@ SECTIONS {
     . = ALIGN(4K);
     __kernel_start = .;
     
-    .tables ALIGN(4K) : AT(ADDR(.tables) - KERNEL_START) {
-        *(.tables)
-    }
-
     .text : AT(ADDR(.text) - KERNEL_START) {
+        *(.init)
         *(.text)
         *(.text.*)
+        *(.fini)
     }
 
     .rodata ALIGN(4K) : AT(ADDR(.rodata) - KERNEL_START){
         *(.data)
         *(.rodata.*)
+    }
+
+    .tables ALIGN(4K) : AT(ADDR(.tables) - KERNEL_START) {
+        *(.tables)
     }
 
     .bss ALIGN(4K) : AT(ADDR(.bss) - KERNEL_START){

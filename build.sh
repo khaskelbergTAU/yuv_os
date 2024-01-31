@@ -27,7 +27,7 @@ case "$1" in
 	    $QEMU -serial stdio -cdrom $ISO -m $MEM_AMNT ;;
         "nogui" )
         shift 2
-	    $QEMU -nographic -S -s -serial stdio -cdrom $ISO -m $MEM_AMNT ;;
+	    $QEMU -nographic -cdrom $ISO -m $MEM_AMNT ;;
         "debug" )
         shift 2
 	    $QEMU -S -s -serial stdio -cdrom $ISO -m $MEM_AMNT ;;

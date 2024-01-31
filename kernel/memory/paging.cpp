@@ -7,7 +7,7 @@ void PageAllocator::paging_init(uintptr_t kernel_base, uintptr_t kernel_end, uin
     PageAllocator *allocator = getInstance();
     allocator->m_kernel_base = kernel_base;
     allocator->m_page_count = page_count;
-    new(reinterpret_cast<void *>(&allocator->m_allocator)) BuddyAllocator<PAGE_MAX_ORDER>(page_count, kernel_base);
+    new (reinterpret_cast<void *>(&allocator->m_allocator)) BitSetPageAllocator(page_count);
 }
 void _load_cr3(PML4_entry pml4[512])
 {
