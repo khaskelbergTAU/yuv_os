@@ -5,11 +5,15 @@ KERNEL_OFFSET = 0x100000;
 TABLES_OFFSET = 0x109000;
 SECTIONS {
 
-    . = KERNEL_OFFSET;
+
+    . = 4K;
 
     .multiboot : {
+        . = ALIGN(8);
         *(.multiboot)
-    } 
+    }
+
+    . = KERNEL_OFFSET;
 
     __boot_start = .;
     .bootloader : {
